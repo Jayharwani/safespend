@@ -1,0 +1,95 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "DM Sans", system-ui, sans-serif;
+  --font-display: "Instrument Serif", Georgia, serif;
+
+  --color-surface: #0f1419;
+  --color-surface-raised: #1a222d;
+  --color-surface-overlay: #242d3a;
+  --color-border: #2e3a4a;
+  --color-text: #f0f4f8;
+  --color-text-muted: #8b9cb3;
+
+  --color-safe: #34d399;
+  --color-safe-bg: #0d3326;
+  --color-tight: #fbbf24;
+  --color-tight-bg: #3d2f0a;
+  --color-danger: #f87171;
+  --color-danger-bg: #3d1515;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  background: var(--color-surface);
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--color-text);
+  min-height: 100dvh;
+  overscroll-behavior: none;
+}
+
+::view-transition-group(*),
+::view-transition-old(*),
+::view-transition-new(*) {
+  animation-duration: 0.25s;
+  animation-timing-function: cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0.6;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes sheet-backdrop {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.35s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.animate-fade-in {
+  animation: fade-in 0.4s cubic-bezier(0.19, 1, 0.22, 1) both;
+}
+
+.animate-backdrop {
+  animation: sheet-backdrop 0.25s ease both;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
