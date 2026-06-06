@@ -182,7 +182,7 @@ export default function EntrySheet({ open, onClose, onSubmit, initial }: EntrySh
                       placeholder="0.00"
                       value={amount}
                       onChange={(e) => setAmount(e.target.value)}
-                      className="form-input money w-full h-[50px] pl-8 text-[18px] font-bold"
+                      className="form-input money w-full h-[50px] !pl-8 text-[18px] font-bold"
                     />
                   </div>
                 </div>

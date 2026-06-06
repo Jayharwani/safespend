@@ -168,7 +168,7 @@ export default function SetupFlow({ onComplete }: SetupFlowProps) {
                         placeholder="2,400"
                         value={payAmount}
                         onChange={(e) => setPayAmount(e.target.value)}
-                        className="form-input money w-full h-[52px] pl-9 text-[18px] font-bold"
+                        className="form-input money w-full h-[52px] !pl-9 text-[18px] font-bold"
                       />
                     </div>
                   </div>
@@ -258,7 +258,7 @@ export default function SetupFlow({ onComplete }: SetupFlowProps) {
                             onChange={(e) =>
                               updateBill(bill.id, { amount: Number(e.target.value) || 0 })
                             }
-                            className="form-input money w-full h-[48px] pl-8"
+                            className="form-input money w-full h-[48px] !pl-8"
                           />
                         </div>
                         <div className="flex items-center gap-2 bg-canvas border border-border-subtle rounded-2xl px-3.5 h-[48px] min-w-[110px]">
