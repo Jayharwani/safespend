@@ -1,4 +1,5 @@
 import { CalendarDays, Home, Settings } from "lucide-react";
+import { motion } from "framer-motion";
 import type { TabId } from "../types";
 
 interface TabBarProps {
@@ -14,12 +15,8 @@ const TABS: { id: TabId; label: string; icon: typeof Home }[] = [
 
 export default function TabBar({ active, onChange }: TabBarProps) {
   return (
-    <nav
-      className="sticky bottom-0 z-40 flex border-t border-border-subtle tabbar-glass"
-      style={{
-        height: "calc(58px + env(safe-area-inset-bottom))",
-        paddingBottom: "env(safe-area-inset-bottom)",
-      }}
+    <div
+      className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-32px)] max-w-[398px] rounded-full tabbar-glass shadow-e3 p-1.5 flex justify-between items-center z-40"
       role="tablist"
       aria-label="Main navigation"
     >
@@ -32,19 +29,27 @@ export default function TabBar({ active, onChange }: TabBarProps) {
             role="tab"
             aria-selected={isActive}
             onClick={() => onChange(id)}
-            className="flex-1 flex flex-col items-center justify-center gap-[3px] min-h-[58px] min-w-[44px] bg-transparent border-none"
-            style={{ color: isActive ? "var(--brand)" : "var(--ink-faint)" }}
+            className="relative flex-1 flex flex-col items-center justify-center gap-[2px] h-[52px] min-w-[44px] bg-transparent border-none cursor-pointer rounded-full outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
+            style={{ color: isActive ? "var(--brand)" : "var(--ink-soft)" }}
           >
+            {isActive && (
+              <motion.div
+                layoutId="activeTabIndicator"
+                className="absolute inset-0 bg-brand-tint dark:bg-brand-soft rounded-full -z-10"
+                transition={{ type: "spring", stiffness: 380, damping: 32 }}
+              />
+            )}
             <Icon
-              className={`w-6 h-6 ${isActive ? "tab-icon-active" : ""}`}
-              strokeWidth={isActive ? 2 : 1.75}
+              className="w-5 h-5 relative z-10 transition-transform duration-200"
+              strokeWidth={isActive ? 2.25 : 1.75}
+              style={{ transform: isActive ? "translateY(-1px)" : "translateY(0)" }}
             />
-            <span className={`text-[12px] leading-[1.3] ${isActive ? "font-medium" : ""}`}>
+            <span className="text-[11px] font-semibold tracking-[-0.1px] relative z-10">
               {label}
             </span>
           </button>
         );
       })}
-    </nav>
+    </div>
   );
 }

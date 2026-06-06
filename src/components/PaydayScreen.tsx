@@ -14,39 +14,44 @@ export default function PaydayScreen({ safeToSpend, onDismiss }: PaydayScreenPro
   useEffect(() => {
     if (prefersReducedMotion()) return;
     confetti({
-      particleCount: 70,
-      spread: 60,
-      startVelocity: 28,
-      scalar: 0.9,
-      ticks: 160,
-      origin: { y: 0.35 },
-      colors: ["#2E9E78", "#5FC49C", "#E3F1EA", "#B07A1E"],
+      particleCount: 80,
+      spread: 70,
+      startVelocity: 30,
+      scalar: 0.95,
+      ticks: 180,
+      origin: { y: 0.4 },
+      colors: ["#436e5d", "#689d86", "#ecf2ef", "#c58852"],
     });
   }, []);
 
   return (
     <motion.div
       className="fixed inset-0 z-[70] flex items-center justify-center px-6"
-      style={{ background: "rgba(20,30,24,0.55)" }}
+      style={{ background: "rgba(14, 18, 16, 0.45)", backdropFilter: "blur(6px)" }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
       <motion.div
-        className="w-full max-w-[360px] hero-panel text-center py-10 px-6"
-        initial={{ scale: 0.9, y: 20 }}
+        className="w-full max-w-[360px] hero-panel text-center py-10 px-6 border border-border-subtle"
+        initial={{ scale: 0.92, y: 15 }}
         animate={{ scale: 1, y: 0 }}
-        transition={{ type: "spring", stiffness: 240, damping: 28 }}
+        transition={{ type: "spring", stiffness: 280, damping: 28 }}
       >
-        <h1 className="text-[30px] font-semibold tracking-[-0.5px] mb-2">Payday.</h1>
+        <h1 className="text-[32px] font-bold tracking-tight text-primary mb-2">Payday!</h1>
+        <p className="text-[14px] text-secondary font-medium">Your new Safe to Spend total is:</p>
         <AnimatedNumber
           value={safeToSpend}
           format={formatMoney}
-          className="text-[56px] leading-none font-semibold tracking-[-1.5px] text-safe my-4"
+          className="text-[56px] leading-none font-bold tracking-[-1.5px] text-safe my-4"
         />
-        <p className="text-[15px] text-secondary mb-8">New cycle — here's your room.</p>
-        <button type="button" onClick={onDismiss} className="btn-primary">
-          Nice
+        <p className="text-[13px] text-secondary mb-8">All reset for your next paycheck cycle.</p>
+        <button
+          type="button"
+          onClick={onDismiss}
+          className="btn-primary w-full h-[52px]"
+        >
+          Got it
         </button>
       </motion.div>
     </motion.div>

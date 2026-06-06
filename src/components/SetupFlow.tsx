@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { format, addDays } from "date-fns";
-import { ChevronRight, Plus, Trash2, Wallet, Calendar, Receipt } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Trash2, Wallet, Calendar, Receipt } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import type { AppData, Bill, PayFrequency } from "../types";
 import { generateId } from "../lib/storage";
 
@@ -13,9 +14,6 @@ const FREQUENCIES: { value: PayFrequency; label: string }[] = [
   { value: "fortnightly", label: "Fortnightly" },
   { value: "monthly", label: "Monthly" },
 ];
-
-const inputClass =
-  "w-full h-[52px] bg-surface border border-border-subtle rounded-[var(--r-md)] px-4 text-[17px] focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)]";
 
 export default function SetupFlow({ onComplete }: SetupFlowProps) {
   const [step, setStep] = useState(0);
@@ -30,9 +28,9 @@ export default function SetupFlow({ onComplete }: SetupFlowProps) {
   ]);
 
   const steps = [
-    { icon: Wallet, title: "Current balance", subtitle: "What's in your account right now?" },
-    { icon: Calendar, title: "Your pay", subtitle: "When does money come in?" },
-    { icon: Receipt, title: "Recurring bills", subtitle: "What comes out automatically?" },
+    { icon: Wallet, title: "Account balance", subtitle: "What is in your bank account right now?" },
+    { icon: Calendar, title: "Your paycheck", subtitle: "When and how much is your income?" },
+    { icon: Receipt, title: "Recurring bills", subtitle: "What are your fixed upcoming expenses?" },
   ];
 
   const canProceed = () => {
@@ -70,214 +68,263 @@ export default function SetupFlow({ onComplete }: SetupFlowProps) {
 
   return (
     <div className="app-shell">
-      <div className="flex-1 flex flex-col px-5 pt-8 pb-8">
-        <div className="animate-fade-in mb-8">
-          <p className="text-[14px] font-medium text-secondary mb-2">Step {step + 1} of 3</p>
-          <div className="flex gap-2 mb-6">
+      <div className="flex-1 flex flex-col px-6 pt-8 pb-8">
+        
+        {/* Navigation / Progress header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            {step > 0 ? (
+              <button
+                type="button"
+                onClick={() => setStep(step - 1)}
+                className="flex items-center gap-1 text-secondary text-[14px] font-semibold cursor-pointer py-1.5"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                Back
+              </button>
+            ) : (
+              <div className="w-10 h-1.5" />
+            )}
+            <span className="text-[12px] font-bold uppercase tracking-wider text-secondary">
+              Step {step + 1} of 3
+            </span>
+          </div>
+
+          <div className="flex gap-1.5 mb-6">
             {[0, 1, 2].map((i) => (
               <div
                 key={i}
-                className={`h-1 flex-1 rounded-full transition-all duration-500 ${
-                  i <= step ? "bg-brand" : "bg-border-subtle"
-                }`}
-              />
+                className="h-1 flex-1 rounded-full relative bg-border-subtle overflow-hidden"
+              >
+                <motion.div
+                  className="absolute inset-y-0 left-0 bg-brand rounded-full"
+                  initial={{ width: "0%" }}
+                  animate={{ width: i <= step ? "100%" : "0%" }}
+                  transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                />
+              </div>
             ))}
           </div>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-11 h-11 rounded-[var(--r-lg)] bg-brand-tint flex items-center justify-center">
-              <StepIcon className="w-5 h-5 text-brand" strokeWidth={1.75} />
+
+          {/* Heading */}
+          <div className="flex items-start gap-3.5 mt-2">
+            <div className="w-11 h-11 rounded-2xl bg-brand-tint dark:bg-brand-soft flex items-center justify-center shrink-0">
+              <StepIcon className="w-5 h-5 text-brand" strokeWidth={2} />
             </div>
             <div>
-              <h1 className="text-[22px] leading-7 font-semibold">{steps[step].title}</h1>
-              <p className="text-secondary text-[15px]">{steps[step].subtitle}</p>
+              <h1 className="text-[22px] font-bold text-primary leading-snug">{steps[step].title}</h1>
+              <p className="text-secondary text-[14px] mt-0.5">{steps[step].subtitle}</p>
             </div>
           </div>
         </div>
 
-        <div className="flex-1 animate-fade-in" style={{ animationDelay: "0.1s" }}>
-          {step === 0 && (
-            <div className="space-y-4">
-              <label className="block">
-                <span className="text-[14px] font-medium text-secondary mb-2 block">
-                  Account balance
-                </span>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-secondary text-[28px]">
-                    $
-                  </span>
-                  <input
-                    type="number"
-                    inputMode="decimal"
-                    placeholder="1,200"
-                    value={balance}
-                    onChange={(e) => setBalance(e.target.value)}
-                    className="money w-full h-[52px] bg-surface border border-border-subtle rounded-[var(--r-md)] pl-10 pr-4 text-[28px] font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)]"
-                    autoFocus
-                  />
-                </div>
-              </label>
-              <p className="text-[13px] text-tertiary leading-relaxed">
-                This is the number your bank shows — we'll adjust it for bills coming up.
-              </p>
-            </div>
-          )}
-
-          {step === 1 && (
-            <div className="space-y-5">
-              <label className="block">
-                <span className="text-[14px] font-medium text-secondary mb-2 block">
-                  Paycheck amount
-                </span>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-secondary">$</span>
-                  <input
-                    type="number"
-                    inputMode="decimal"
-                    placeholder="2,400"
-                    value={payAmount}
-                    onChange={(e) => setPayAmount(e.target.value)}
-                    className={`money ${inputClass} pl-9 text-[22px] font-semibold`}
-                  />
-                </div>
-              </label>
-
-              <label className="block">
-                <span className="text-[14px] font-medium text-secondary mb-2 block">
-                  Next payday
-                </span>
-                <input
-                  type="date"
-                  value={nextPayday}
-                  onChange={(e) => setNextPayday(e.target.value)}
-                  className={inputClass}
-                />
-              </label>
-
-              <div>
-                <span className="text-[14px] font-medium text-secondary mb-3 block">
-                  How often?
-                </span>
-                <div className="flex gap-1 p-1 bg-[var(--n-100)] rounded-[var(--r-pill)]">
-                  {FREQUENCIES.map((f) => (
-                    <button
-                      key={f.value}
-                      type="button"
-                      onClick={() => setPayFrequency(f.value)}
-                      className={`flex-1 h-[44px] rounded-[var(--r-pill)] text-[15px] font-medium ${
-                        payFrequency === f.value
-                          ? "bg-surface text-primary shadow-e1"
-                          : "text-secondary"
-                      }`}
-                    >
-                      {f.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {step === 2 && (
-            <div className="space-y-3">
-              {bills.map((bill, idx) => (
-                <div
-                  key={bill.id}
-                  className="bg-surface border border-border-subtle rounded-[var(--r-lg)] p-4 space-y-3 shadow-e1"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-[13px] font-medium text-secondary">Bill {idx + 1}</span>
-                    {bills.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => removeBill(bill.id)}
-                        className="text-tertiary min-w-[44px] min-h-[44px] flex items-center justify-center"
-                      >
-                        <Trash2 className="w-4 h-4" strokeWidth={1.75} />
-                      </button>
-                    )}
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Phone bill"
-                    value={bill.name}
-                    onChange={(e) => updateBill(bill.id, { name: e.target.value })}
-                    className={inputClass}
-                  />
-                  <div className="flex gap-2">
-                    <div className="relative flex-1">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary">
-                        $
-                      </span>
+        {/* Content Box with transition */}
+        <div className="flex-1">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={step}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+              className="h-full"
+            >
+              {step === 0 && (
+                <div className="space-y-6 pt-4 text-center">
+                  <div className="space-y-2">
+                    <span className="text-[13px] font-bold uppercase tracking-wider text-secondary">
+                      Current balance
+                    </span>
+                    <div className="relative flex items-center justify-center">
+                      <span className="text-secondary text-[36px] font-medium mr-1 select-none">$</span>
                       <input
                         type="number"
                         inputMode="decimal"
-                        placeholder="60"
-                        value={bill.amount || ""}
-                        onChange={(e) =>
-                          updateBill(bill.id, { amount: Number(e.target.value) || 0 })
-                        }
-                        className={`money ${inputClass} pl-7`}
-                      />
-                    </div>
-                    <div className="flex items-center gap-1.5 bg-[var(--n-50)] border border-border-subtle rounded-[var(--r-md)] px-3 h-[52px]">
-                      <span className="text-secondary text-[13px]">Day</span>
-                      <input
-                        type="number"
-                        inputMode="numeric"
-                        min={1}
-                        max={31}
-                        value={bill.dayOfMonth}
-                        onChange={(e) =>
-                          updateBill(bill.id, {
-                            dayOfMonth: Math.min(31, Math.max(1, Number(e.target.value) || 1)),
-                          })
-                        }
-                        className="money w-10 bg-transparent text-[17px] text-center focus:outline-none"
+                        placeholder="0.00"
+                        value={balance}
+                        onChange={(e) => setBalance(e.target.value)}
+                        className="money bg-transparent border-none text-[56px] font-bold text-primary focus:outline-none text-center w-full max-w-[280px]"
+                        autoFocus
                       />
                     </div>
                   </div>
+                  <p className="text-[13px] text-secondary leading-relaxed max-w-[300px] mx-auto">
+                    Enter the current total amount showing in your bank account. We'll adjust it automatically as upcoming bills approach.
+                  </p>
                 </div>
-              ))}
+              )}
 
-              <button
-                type="button"
-                onClick={addBill}
-                className="w-full flex items-center justify-center gap-2 h-[52px] rounded-[var(--r-md)] border border-dashed border-border-strong text-secondary text-[15px] font-medium"
-              >
-                <Plus className="w-4 h-4" strokeWidth={2} />
-                Add another bill
-              </button>
+              {step === 1 && (
+                <div className="space-y-5 pt-2">
+                  <div className="space-y-1.5">
+                    <label className="text-[13px] font-bold uppercase tracking-wider text-secondary block pl-1">
+                      Paycheck amount
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-secondary font-medium">$</span>
+                      <input
+                        type="number"
+                        inputMode="decimal"
+                        placeholder="2,400"
+                        value={payAmount}
+                        onChange={(e) => setPayAmount(e.target.value)}
+                        className="form-input money w-full h-[52px] pl-9 text-[18px] font-bold"
+                      />
+                    </div>
+                  </div>
 
-              <p className="text-[13px] text-tertiary leading-relaxed pt-2">
-                Skip any you don't have — you can always add more later.
-              </p>
-            </div>
-          )}
+                  <div className="space-y-1.5">
+                    <label className="text-[13px] font-bold uppercase tracking-wider text-secondary block pl-1">
+                      Next payday
+                    </label>
+                    <input
+                      type="date"
+                      value={nextPayday}
+                      onChange={(e) => setNextPayday(e.target.value)}
+                      className="form-input w-full h-[52px]"
+                    />
+                  </div>
+
+                  <div className="space-y-2.5">
+                    <label className="text-[13px] font-bold uppercase tracking-wider text-secondary block pl-1">
+                      Pay Frequency
+                    </label>
+                    <div className="flex gap-1 p-1 bg-canvas border border-border-subtle rounded-full relative">
+                      {FREQUENCIES.map((f) => {
+                        const isFreqActive = payFrequency === f.value;
+                        return (
+                          <button
+                            key={f.value}
+                            type="button"
+                            onClick={() => setPayFrequency(f.value)}
+                            className="relative flex-1 h-[42px] rounded-full text-[14px] font-semibold z-10 cursor-pointer outline-none"
+                            style={{ color: isFreqActive ? "var(--brand)" : "var(--ink-soft)" }}
+                          >
+                            {isFreqActive && (
+                              <motion.div
+                                layoutId="freqActiveIndicator"
+                                className="absolute inset-0 bg-surface shadow-sm rounded-full -z-10 border border-border-subtle"
+                                transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                              />
+                            )}
+                            {f.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {step === 2 && (
+                <div className="space-y-4 pt-1 max-h-[50dvh] overflow-y-auto pr-1">
+                  {bills.map((bill, idx) => (
+                    <div
+                      key={bill.id}
+                      className="bg-surface border border-border-subtle rounded-2xl p-4 space-y-3 shadow-sm relative"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-[12px] font-bold uppercase tracking-wider text-secondary">
+                          Bill #{idx + 1}
+                        </span>
+                        {bills.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => removeBill(bill.id)}
+                            className="text-secondary hover:text-over min-w-[36px] min-h-[36px] flex items-center justify-center cursor-pointer transition-colors"
+                            aria-label="Remove bill"
+                          >
+                            <Trash2 className="w-4 h-4" strokeWidth={2} />
+                          </button>
+                        )}
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="E.g. Rent, Internet, Spotify"
+                        value={bill.name}
+                        onChange={(e) => updateBill(bill.id, { name: e.target.value })}
+                        className="form-input w-full h-[48px]"
+                      />
+                      <div className="flex gap-3">
+                        <div className="relative flex-1">
+                          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-secondary font-medium">
+                            $
+                          </span>
+                          <input
+                            type="number"
+                            inputMode="decimal"
+                            placeholder="Amount"
+                            value={bill.amount || ""}
+                            onChange={(e) =>
+                              updateBill(bill.id, { amount: Number(e.target.value) || 0 })
+                            }
+                            className="form-input money w-full h-[48px] pl-8"
+                          />
+                        </div>
+                        <div className="flex items-center gap-2 bg-canvas border border-border-subtle rounded-2xl px-3.5 h-[48px] min-w-[110px]">
+                          <span className="text-secondary text-[12px] font-semibold uppercase">Day</span>
+                          <input
+                            type="number"
+                            inputMode="numeric"
+                            min={1}
+                            max={31}
+                            value={bill.dayOfMonth}
+                            onChange={(e) =>
+                              updateBill(bill.id, {
+                                dayOfMonth: Math.min(31, Math.max(1, Number(e.target.value) || 1)),
+                              })
+                            }
+                            className="money w-8 bg-transparent text-[16px] font-bold text-center focus:outline-none"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                  <button
+                    type="button"
+                    onClick={addBill}
+                    className="w-full flex items-center justify-center gap-2 h-[50px] rounded-2xl border-2 border-dashed border-border-strong text-secondary hover:text-primary hover:border-brand text-[14px] font-semibold transition-all cursor-pointer"
+                  >
+                    <Plus className="w-4 h-4" strokeWidth={2.5} />
+                    Add another expense
+                  </button>
+
+                  <p className="text-[12px] text-secondary leading-relaxed pt-1 text-center">
+                    No bills yet? You can skip this and add them later in settings.
+                  </p>
+                </div>
+              )}
+            </motion.div>
+          </AnimatePresence>
         </div>
 
-        <div className="mt-8 space-y-3 animate-fade-in" style={{ animationDelay: "0.2s" }}>
+        {/* Action Button footer */}
+        <div className="mt-8 space-y-3">
           {step < 2 ? (
             <button
               type="button"
               disabled={!canProceed()}
               onClick={() => setStep(step + 1)}
-              className="w-full h-[52px] flex items-center justify-center gap-2 bg-brand text-white font-semibold text-[17px] rounded-[var(--r-md)] disabled:opacity-40 disabled:cursor-not-allowed"
+              className="btn-primary"
             >
               Continue
-              <ChevronRight className="w-5 h-5" strokeWidth={2} />
+              <ChevronRight className="w-5 h-5" strokeWidth={2.25} />
             </button>
           ) : (
             <button
               type="button"
               onClick={handleFinish}
-              className="w-full h-[52px] flex items-center justify-center gap-2 bg-brand text-white font-semibold text-[17px] rounded-[var(--r-md)]"
+              className="btn-primary"
             >
-              See my number
-              <ChevronRight className="w-5 h-5" strokeWidth={2} />
+              See my Safe Spend
+              <ChevronRight className="w-5 h-5" strokeWidth={2.25} />
             </button>
           )}
 
-          <p className="text-center text-tertiary text-[13px]">You can change all of this later</p>
+          <p className="text-center text-secondary text-[12px] font-medium">
+            All data is stored locally on your device
+          </p>
         </div>
       </div>
     </div>

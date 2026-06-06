@@ -12,6 +12,8 @@ export default function AllSetScreen({ safeToSpend, onContinue }: AllSetScreenPr
   return (
     <div className="app-shell">
       <div className="flex-1 flex flex-col items-center justify-center px-6 pb-8 text-center">
+        
+        {/* Animated Checkmark */}
         <motion.svg
           width="72"
           height="72"
@@ -21,12 +23,12 @@ export default function AllSetScreen({ safeToSpend, onContinue }: AllSetScreenPr
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.5, ease: easeOut }}
         >
-          <circle cx="36" cy="36" r="34" fill="#E3F1EA" stroke="#2E9E78" strokeWidth="2" />
+          <circle cx="36" cy="36" r="34" fill="var(--brand-soft)" stroke="var(--brand)" strokeWidth="2.5" />
           <motion.path
-            d="M22 37 L32 47 L52 27"
+            d="M24 37 L32 45 L48 27"
             fill="none"
-            stroke="#1C6F53"
-            strokeWidth="3"
+            stroke="var(--brand-deep)"
+            strokeWidth="3.5"
             strokeLinecap="round"
             strokeLinejoin="round"
             initial={{ pathLength: 0 }}
@@ -35,17 +37,24 @@ export default function AllSetScreen({ safeToSpend, onContinue }: AllSetScreenPr
           />
         </motion.svg>
 
-        <h1 className="text-[30px] font-semibold tracking-[-0.5px] mb-2">You're all set</h1>
-        <p className="text-secondary text-[15px] mb-6">Here's what you can safely spend</p>
+        {/* Text */}
+        <h1 className="text-[30px] font-bold text-primary tracking-tight mb-2">You are all set</h1>
+        <p className="text-secondary text-[14px] mb-8 font-medium">Your current Safe to Spend total is:</p>
 
+        {/* Big Number */}
         <AnimatedNumber
           value={safeToSpend}
           format={formatMoney}
-          className="text-[64px] leading-none font-semibold tracking-[-1.5px] text-safe mb-8"
+          className="text-[64px] leading-none font-bold tracking-[-1.5px] text-safe mb-10"
         />
 
-        <button type="button" onClick={onContinue} className="btn-primary w-full max-w-[320px]">
-          Go to Headroom
+        {/* Button */}
+        <button
+          type="button"
+          onClick={onContinue}
+          className="btn-primary w-full max-w-[320px] h-[52px]"
+        >
+          Go to Dashboard
         </button>
       </div>
     </div>

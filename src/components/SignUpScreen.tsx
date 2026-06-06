@@ -7,54 +7,67 @@ interface SignUpScreenProps {
 export default function SignUpScreen({ onGuest }: SignUpScreenProps) {
   return (
     <div className="app-shell">
-      <div className="flex-1 flex flex-col px-6 pt-12 pb-8">
+      <div className="flex-1 flex flex-col justify-center px-6 pt-12 pb-8">
+        
+        {/* Title */}
         <div className="rise mb-8" style={{ animationDelay: "0ms" }}>
-          <h1 className="text-[30px] leading-[1.15] font-semibold tracking-[-0.5px] mb-2">
+          <h1 className="text-[32px] font-bold tracking-tight text-primary leading-tight">
             Create your account
           </h1>
-          <p className="text-secondary text-[15px]">Takes less than a minute.</p>
+          <p className="text-secondary text-[14px] mt-1">Setup takes less than a minute.</p>
         </div>
 
-        <div className="space-y-3 rise" style={{ animationDelay: "70ms" }}>
+        {/* Social SSO buttons */}
+        <div className="space-y-3 rise animate-push-in" style={{ animationDelay: "70ms" }}>
           <button
             type="button"
             onClick={onGuest}
-            className="w-full h-[54px] rounded-[var(--r-button)] bg-surface border border-border-subtle font-semibold text-[17px] shadow-e1"
+            className="w-full h-[52px] rounded-2xl bg-surface border border-border-subtle hover:bg-canvas/30 font-semibold text-[15px] shadow-sm flex items-center justify-center gap-2 cursor-pointer transition-colors"
           >
             Continue with Apple
           </button>
           <button
             type="button"
             onClick={onGuest}
-            className="w-full h-[54px] rounded-[var(--r-button)] bg-surface border border-border-subtle font-semibold text-[17px] shadow-e1"
+            className="w-full h-[52px] rounded-2xl bg-surface border border-border-subtle hover:bg-canvas/30 font-semibold text-[15px] shadow-sm flex items-center justify-center gap-2 cursor-pointer transition-colors"
           >
             Continue with Google
           </button>
         </div>
 
-        <div className="flex items-center gap-4 my-6 rise" style={{ animationDelay: "140ms" }}>
+        {/* Divider */}
+        <div className="flex items-center gap-4 my-7 rise" style={{ animationDelay: "140ms" }}>
           <div className="flex-1 h-px bg-border-subtle" />
-          <span className="text-[13px] text-tertiary">or</span>
+          <span className="text-[12px] font-bold uppercase tracking-wider text-secondary">or</span>
           <div className="flex-1 h-px bg-border-subtle" />
         </div>
 
-        <div className="rise space-y-4" style={{ animationDelay: "210ms" }}>
-          <label className="block">
-            <span className="text-[14px] font-medium text-secondary mb-2 block">Email</span>
+        {/* Form Inputs */}
+        <div className="rise space-y-5" style={{ animationDelay: "210ms" }}>
+          <div className="space-y-1.5">
+            <label className="text-[12px] font-bold uppercase tracking-wider text-secondary pl-1 block">
+              Email Address
+            </label>
             <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-tertiary" />
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-secondary" strokeWidth={2} />
               <input
                 type="email"
-                placeholder="you@email.com"
-                className="w-full h-[54px] bg-surface border border-border-subtle rounded-[var(--r-button)] pl-12 pr-4 text-[17px]"
+                placeholder="you@example.com"
+                className="form-input w-full h-[52px] pl-12"
               />
             </div>
-          </label>
-          <button type="button" onClick={onGuest} className="btn-primary">
-            Continue as guest
+          </div>
+
+          <button
+            type="button"
+            onClick={onGuest}
+            className="btn-primary w-full h-[52px]"
+          >
+            Continue as Guest
           </button>
-          <p className="text-[12px] text-tertiary text-center leading-relaxed">
-            By continuing you agree to our terms. No bank connection required for the demo.
+          
+          <p className="text-[11px] text-secondary text-center leading-relaxed max-w-[280px] mx-auto">
+            By continuing, you agree to our Terms of Service. No bank connection or credit card required.
           </p>
         </div>
       </div>

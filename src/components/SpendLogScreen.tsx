@@ -17,49 +17,52 @@ export default function SpendLogScreen({ data, onBack }: SpendLogScreenProps) {
 
   return (
     <div className="app-shell">
-      <header className="flex items-center gap-2 px-4 pt-4 pb-2 min-h-[44px]">
+      <header className="flex items-center gap-3 px-5 pt-6 pb-2">
         <button
           type="button"
           onClick={onBack}
-          className="icon-btn w-10 h-10 rounded-full bg-surface shadow-e1 flex items-center justify-center text-secondary"
+          className="w-10 h-10 rounded-full bg-surface border border-border-subtle shadow-e1 flex items-center justify-center text-secondary hover:text-primary transition-colors cursor-pointer"
+          aria-label="Go back"
         >
-          <ChevronLeft className="w-5 h-5" />
+          <ChevronLeft className="w-5 h-5" strokeWidth={2} />
         </button>
-        <h1 className="text-[17px] font-semibold">This cycle</h1>
+        <h1 className="text-[20px] font-bold text-primary">Spending History</h1>
       </header>
 
-      <div className="px-6 pb-8">
-        <div className="rich-card mb-6 text-center py-5">
-          <p className="text-[14px] text-secondary mb-1">Total logged</p>
-          <p className="money text-[36px] font-semibold text-primary">−{formatMoney(total)}</p>
+      <div className="flex-1 overflow-y-auto px-6 pb-12 pt-3 space-y-6">
+        <div className="rich-card text-center py-6">
+          <p className="text-[12px] font-bold uppercase tracking-wider text-secondary mb-1">Total spend logged</p>
+          <p className="money text-[40px] font-bold text-primary">−{formatMoney(total)}</p>
+          <p className="text-[11px] text-secondary mt-1">in this payment cycle</p>
         </div>
 
         {spends.length === 0 ? (
-          <div className="rich-card text-center py-8">
-            <p className="text-[17px] font-semibold mb-1">Nothing logged yet</p>
-            <p className="text-secondary text-[15px]">Spends you log will show up here</p>
+          <div className="rich-card text-center py-10">
+            <p className="text-[16px] font-bold mb-1">No spending logged</p>
+            <p className="text-secondary text-[13px]">Transactions you log on the dashboard will appear here.</p>
           </div>
         ) : (
-          <ul className="rich-card p-0 overflow-hidden">
-            {spends.map((spend, i) => (
-              <li
-                key={spend.id}
-                className={`flex justify-between items-center min-h-[60px] px-[22px] py-3 ${
-                  i > 0 ? "border-t border-border-subtle" : ""
-                }`}
-              >
-                <div>
-                  <p className="text-[17px]">{spend.name}</p>
-                  <p className="text-[13px] text-secondary">
-                    {format(new Date(spend.date), "MMM d, yyyy")}
-                  </p>
-                </div>
-                <span className="money text-[17px] font-semibold text-secondary">
-                  −{formatMoney(spend.amount)}
-                </span>
-              </li>
-            ))}
-          </ul>
+          <div className="space-y-3">
+            <h2 className="text-[12px] font-bold uppercase tracking-wider text-secondary pl-1">Logged expenses</h2>
+            <ul className="rich-card p-0 overflow-hidden divide-y divide-border-subtle">
+              {spends.map((spend) => (
+                <li
+                  key={spend.id}
+                  className="flex justify-between items-center px-5 py-4 hover:bg-canvas/20 transition-colors"
+                >
+                  <div className="min-w-0 flex-1 pr-4">
+                    <p className="text-[15px] font-semibold text-primary truncate">{spend.name}</p>
+                    <p className="text-[12px] text-secondary mt-0.5">
+                      {format(new Date(spend.date), "MMM d, yyyy")}
+                    </p>
+                  </div>
+                  <span className="money text-[15px] font-bold text-secondary shrink-0">
+                    −{formatMoney(spend.amount)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
       </div>
     </div>
