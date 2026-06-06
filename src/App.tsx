@@ -204,7 +204,7 @@ export default function App() {
 
   return (
     <>
-      <AppShell footer={<TabBar active={tab} onChange={setTab} />}>
+      <AppShell status={projection.status} footer={<TabBar active={tab} onChange={setTab} />}>
         <PageTransition id={tab}>
           {tab === "today" && (
             <TodayScreen

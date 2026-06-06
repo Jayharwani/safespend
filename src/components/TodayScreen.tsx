@@ -23,12 +23,6 @@ interface TodayScreenProps {
   onOpenSettings: () => void;
 }
 
-const statusColor: Record<BudgetStatus, string> = {
-  healthy: "var(--brand)",
-  tight: "var(--tight)",
-  over: "var(--over)",
-};
-
 const statusSubcopy = {
   healthy: (amount: string) => `You are well within your safe zone with ${amount} left.`,
   tight: (amount: string, date: string) =>
@@ -109,30 +103,44 @@ export default function TodayScreen({
                 </p>
               </div>
             ) : (
-              <>
-                <div className="flex items-center gap-1.5 text-[13px] font-semibold uppercase tracking-wider text-secondary relative z-[1]">
-                  <Sparkles className="w-4 h-4 text-brand" />
+              <div className="flex flex-col items-center py-2 relative z-[1]">
+                <div className="flex items-center gap-1.5 text-[12px] font-bold uppercase tracking-wider text-secondary">
+                  <Sparkles className="w-3.5 h-3.5" style={{ color: `var(--${projection.status})` }} />
                   Safe to Spend
                 </div>
+                
+                {/* Glowing Odometer-style animated main number */}
                 <motion.div
-                  animate={{ color: statusColor[projection.status] }}
-                  transition={{ duration: 0.5 }}
-                  className="relative z-[1]"
+                  animate={{ scale: [0.97, 1] }}
+                  transition={{ type: "spring", stiffness: 220, damping: 22 }}
+                  className="my-2"
                 >
                   <AnimatedNumber
                     value={safeToSpend}
                     format={formatMoney}
-                    className="text-[60px] leading-none font-bold tracking-[-1.5px] my-3"
+                    className={`text-[64px] leading-none font-bold tracking-[-2%] text-glow-${projection.status}`}
                     aria-label={`Safe to spend: ${safeToSpend} dollars until ${paydayLabel}`}
                   />
                 </motion.div>
-                <div className="mt-3.5 relative z-[1] flex items-center justify-between">
+
+                {/* Sleek Daily Breakdown Pill */}
+                {daysUntilPayday > 0 ? (
+                  <span className="inline-flex items-center gap-1 bg-white/5 border border-white/10 rounded-full px-3 py-1 text-[13px] font-semibold text-secondary">
+                    ≈ {formatMoney(dailyAllowance)} / day
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center bg-white/5 border border-white/10 rounded-full px-3 py-1 text-[13px] font-semibold text-secondary">
+                    Payday is today!
+                  </span>
+                )}
+
+                <div className="mt-5 w-full pt-4 border-t border-white/5 relative z-[1] flex items-center justify-between">
                   <StatePill status={projection.status} />
                   <span className="text-[13px] text-secondary font-medium">{subcopy}</span>
                 </div>
 
                 {/* Lowest Point Warning Alert */}
-                <div className="mt-4 pt-4 border-t border-border-subtle relative z-[1] text-[13px]">
+                <div className="mt-4 w-full pt-4 border-t border-white/5 relative z-[1] text-[13px]">
                   {projection.status === "healthy" && (
                     <p className="text-secondary">
                       Lowest projected balance: <strong className="font-semibold text-primary">{formatMoney(projection.lowestBalance)}</strong> on {projection.lowestBalanceLabel}
@@ -149,7 +157,7 @@ export default function TodayScreen({
                     </p>
                   )}
                 </div>
-              </>
+              </div>
             )}
 
             <div className="relative z-[1] mt-5">
@@ -183,7 +191,7 @@ export default function TodayScreen({
                   <span className="text-[12px] font-bold uppercase tracking-wider text-secondary">
                     Daily Limit
                   </span>
-                  <div className="w-7 h-7 rounded-full bg-brand-tint flex items-center justify-center text-brand">
+                  <div className="w-7 h-7 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-brand">
                     <DollarSign className="w-4 h-4" />
                   </div>
                 </div>
@@ -200,7 +208,7 @@ export default function TodayScreen({
                   <span className="text-[12px] font-bold uppercase tracking-wider text-secondary">
                     Payday In
                   </span>
-                  <div className="w-7 h-7 rounded-full bg-brand-tint flex items-center justify-center text-brand">
+                  <div className="w-7 h-7 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-brand">
                     <Calendar className="w-4 h-4" />
                   </div>
                 </div>
@@ -224,7 +232,7 @@ export default function TodayScreen({
                     Projected balance trajectory
                   </p>
                 </div>
-                <span className="money text-[15px] font-semibold text-secondary bg-canvas px-2.5 py-1 rounded-full border border-border-subtle">
+                <span className="money text-[14px] font-semibold text-secondary bg-white/5 px-3 py-1 rounded-full border border-border-subtle">
                   Bank: {formatMoney(data.balance)}
                 </span>
               </div>
@@ -243,7 +251,7 @@ export default function TodayScreen({
                 <button
                   type="button"
                   onClick={onOpenSpendLog}
-                  className="text-brand text-[13px] font-semibold flex items-center gap-1 min-h-[36px] hover:opacity-80 transition-opacity cursor-pointer"
+                  className="text-brand text-[13px] font-semibold flex items-center gap-1 min-h-[36px] hover:opacity-80 transition-opacity cursor-pointer bg-transparent border-none"
                 >
                   <List className="w-4 h-4" />
                   History log
@@ -255,13 +263,13 @@ export default function TodayScreen({
                   No upcoming bills before your next paycheck.
                 </p>
               ) : (
-                <ul className="divide-y divide-border-subtle">
+                <ul className="divide-y divide-white/5">
                   {upcomingBills.map((bill, i) => {
                     const Icon = getBillIcon(bill.name);
                     return (
                       <li
                         key={`${bill.name}-${bill.dateLabel}-${i}`}
-                        className="flex items-center gap-4 px-5 py-4 hover:bg-canvas/30 transition-colors"
+                        className="flex items-center gap-4 px-5 py-4 hover:bg-white/[0.02] transition-colors"
                       >
                         <span className="chip-ico">
                           <Icon className="w-5 h-5" strokeWidth={2} />
