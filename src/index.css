@@ -4,25 +4,25 @@
   --font: "Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
   --font-sans: var(--font);
 
-  /* Spatial Dark Mode Color Architecture */
-  --canvas: #070a12;         /* Deep cinematic dark void */
-  --surface: rgba(18, 27, 43, 0.65); /* Frosted dark glass sheet */
-  --surface-raised: rgba(25, 38, 60, 0.8);
+  /* Antigravity Glassmorphic Skeuomorphism Palette */
+  --canvas: #090d14;         /* Midnight deep space void */
+  --surface: rgba(22, 29, 45, 0.7); /* Frosted slate-indigo glass sheet */
+  --surface-raised: rgba(29, 39, 60, 0.85);
 
-  --brand: #10b981;          /* Safe Green by default */
-  --brand-deep: #065f46;
-  --brand-soft: rgba(16, 185, 129, 0.08);
+  --brand: #00f29f;          /* Luminous Safe Mint Green */
+  --brand-deep: #00bc7b;
+  --brand-soft: rgba(0, 242, 159, 0.08);
 
-  --safe: #10b981;           /* Neon Emerald */
-  --tight: #f59e0b;          /* Neon Amber Warning */
-  --over: #ef4444;           /* Neon Danger Crimson */
-  --safe-bg: rgba(16, 185, 129, 0.08);
-  --tight-bg: rgba(245, 158, 11, 0.08);
-  --over-bg: rgba(239, 68, 68, 0.08);
+  --safe: #00f29f;           /* Safe Mint */
+  --tight: #ffaa00;          /* Alert Gold */
+  --over: #ff4560;           /* Danger Crimson */
+  --safe-bg: rgba(0, 242, 159, 0.08);
+  --tight-bg: rgba(255, 170, 0, 0.08);
+  --over-bg: rgba(255, 69, 96, 0.08);
 
-  --ink: #f8fafc;            /* Crisp slate white */
+  --ink: #f1f5f9;            /* Crisp slate white */
   --ink-soft: #94a3b8;       /* Medium slate gray */
-  --ink-faint: #475569;      /* Muted placeholder slate */
+  --ink-faint: #475569;      /* Deep graphite */
 
   --hairline: rgba(255, 255, 255, 0.08); /* 1px white border at 8% opacity */
 
@@ -31,7 +31,7 @@
   --shadow-md: 0 12px 28px rgba(0, 0, 0, 0.5);
   --shadow-lg: 0 24px 50px rgba(0, 0, 0, 0.7);
 
-  --hero-grad: linear-gradient(158deg, #111a2e 0%, #070a12 68%);
+  --hero-grad: linear-gradient(158deg, #111a2e 0%, #090d14 68%);
 
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-soft: cubic-bezier(0.25, 1, 0.5, 1);
@@ -58,7 +58,7 @@
   --safe-fg: var(--safe);
   --tight-fg: var(--tight);
   --over-fg: var(--over);
-  --focus-ring: rgba(16, 185, 129, 0.18);
+  --focus-ring: rgba(0, 242, 159, 0.18);
   --r-md: var(--r-button);
   --r-lg: var(--r-card);
   --r-xl: var(--r-sheet);
@@ -123,8 +123,8 @@ body {
 /* Glassmorphic Bento Cards */
 .bento-card, .rich-card {
   background: var(--surface);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
   border-radius: var(--r-card);
   box-shadow: var(--shadow-sm);
   padding: 24px;
@@ -142,7 +142,7 @@ body {
 
 /* Glassmorphism Floating Dock */
 .tabbar-glass {
-  background: rgba(18, 27, 43, 0.65);
+  background: rgba(22, 29, 45, 0.7);
   backdrop-filter: saturate(190%) blur(24px);
   -webkit-backdrop-filter: saturate(190%) blur(24px);
   border: 1px solid var(--hairline);
@@ -175,19 +175,19 @@ button:active:not(:disabled) {
 }
 
 /* Glow classes for Odometer Hero number */
-.text-glow-safe {
+.text-glow-healthy {
   color: var(--safe);
-  text-shadow: 0 0 20px rgba(16, 185, 129, 0.45), 0 0 4px rgba(16, 185, 129, 0.2);
+  text-shadow: 0 0 24px rgba(0, 242, 159, 0.45), 0 0 4px rgba(0, 242, 159, 0.2);
 }
 
 .text-glow-tight {
   color: var(--tight);
-  text-shadow: 0 0 20px rgba(245, 158, 11, 0.45), 0 0 4px rgba(245, 158, 11, 0.2);
+  text-shadow: 0 0 24px rgba(255, 170, 0, 0.45), 0 0 4px rgba(255, 170, 0, 0.2);
 }
 
 .text-glow-over {
   color: var(--over);
-  text-shadow: 0 0 20px rgba(239, 68, 68, 0.45), 0 0 4px rgba(239, 68, 68, 0.2);
+  text-shadow: 0 0 24px rgba(255, 69, 96, 0.45), 0 0 4px rgba(255, 69, 96, 0.2);
 }
 
 /* Animations */
@@ -209,7 +209,7 @@ button:active:not(:disabled) {
   }
   50% {
     transform: scale(1.08);
-    filter: brightness(1.05) drop-shadow(0 0 8px rgba(16, 185, 129, 0.3));
+    filter: brightness(1.05) drop-shadow(0 0 8px rgba(0, 242, 159, 0.3));
   }
 }
 
@@ -415,9 +415,9 @@ button:active:not(:disabled) {
   left: -90px;
   animation: float-orb 22s var(--ease-soft) infinite;
 }
-.ambient-orb-1.status-healthy { background: rgba(16, 185, 129, 0.16); }
-.ambient-orb-1.status-tight { background: rgba(245, 158, 11, 0.14); }
-.ambient-orb-1.status-over { background: rgba(239, 68, 68, 0.16); }
+.ambient-orb-1.status-healthy { background: rgba(0, 242, 159, 0.16); }
+.ambient-orb-1.status-tight { background: rgba(255, 170, 0, 0.14); }
+.ambient-orb-1.status-over { background: rgba(255, 69, 96, 0.16); }
 
 .ambient-orb-2 {
   width: 280px;
@@ -439,9 +439,9 @@ button:active:not(:disabled) {
   animation: float-orb 24s var(--ease-soft) infinite;
   animation-delay: -10s;
 }
-.ambient-orb-3.status-healthy { background: rgba(16, 185, 129, 0.1); }
-.ambient-orb-3.status-tight { background: rgba(245, 158, 11, 0.08); }
-.ambient-orb-3.status-over { background: rgba(239, 68, 68, 0.1); }
+.ambient-orb-3.status-healthy { background: rgba(0, 242, 159, 0.1); }
+.ambient-orb-3.status-tight { background: rgba(255, 170, 0, 0.08); }
+.ambient-orb-3.status-over { background: rgba(255, 69, 96, 0.1); }
 
 /* Hero Budget Panel */
 .hero-panel {
@@ -470,18 +470,18 @@ button:active:not(:disabled) {
 }
 
 .hero-panel--healthy {
-  box-shadow: var(--shadow-md), 0 8px 30px rgba(16, 185, 129, 0.08);
-  border-color: rgba(16, 185, 129, 0.15);
+  box-shadow: var(--shadow-md), 0 8px 30px rgba(0, 242, 159, 0.08);
+  border-color: rgba(0, 242, 159, 0.15);
 }
 
 .hero-panel--tight {
-  box-shadow: var(--shadow-md), 0 8px 30px rgba(245, 158, 11, 0.06);
-  border-color: rgba(245, 158, 11, 0.15);
+  box-shadow: var(--shadow-md), 0 8px 30px rgba(255, 170, 0, 0.06);
+  border-color: rgba(255, 170, 0, 0.15);
 }
 
 .hero-panel--over {
-  box-shadow: var(--shadow-md), 0 8px 30px rgba(239, 68, 68, 0.06);
-  border-color: rgba(239, 68, 68, 0.15);
+  box-shadow: var(--shadow-md), 0 8px 30px rgba(255, 69, 96, 0.06);
+  border-color: rgba(255, 69, 96, 0.15);
 }
 
 .chip-ico {
@@ -502,7 +502,7 @@ li:hover .chip-ico {
   transform: scale(1.08) rotate(3deg);
   background: var(--brand-soft);
   color: var(--brand);
-  border-color: rgba(16, 185, 129, 0.2);
+  border-color: rgba(0, 242, 159, 0.2);
 }
 
 /* Premium tactile buttons */
@@ -511,12 +511,12 @@ li:hover .chip-ico {
   height: 56px;
   border: none;
   border-radius: var(--r-button);
-  background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+  background: linear-gradient(180deg, #00f29f 0%, #00bc7b 100%);
   color: #ffffff;
   font-size: 16px;
   font-weight: 700;
   letter-spacing: -0.2px;
-  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.25), var(--shadow-sm);
+  box-shadow: 0 4px 20px rgba(0, 242, 159, 0.25), var(--shadow-sm);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -527,12 +527,12 @@ li:hover .chip-ico {
 
 .btn-primary:hover {
   filter: brightness(1.06);
-  box-shadow: 0 6px 24px rgba(16, 185, 129, 0.35), var(--shadow-md);
+  box-shadow: 0 6px 24px rgba(0, 242, 159, 0.35), var(--shadow-md);
 }
 
 .btn-primary:active {
   transform: scale(0.96);
-  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.15), var(--shadow-sm);
+  box-shadow: 0 2px 6px rgba(0, 242, 159, 0.15), var(--shadow-sm);
 }
 
 /* Soft Form Control Styles */

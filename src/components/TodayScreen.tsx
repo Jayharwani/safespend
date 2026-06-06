@@ -105,7 +105,7 @@ export default function TodayScreen({
             ) : (
               <div className="flex flex-col items-center py-2 relative z-[1]">
                 <div className="flex items-center gap-1.5 text-[12px] font-bold uppercase tracking-wider text-secondary">
-                  <Sparkles className="w-3.5 h-3.5" style={{ color: `var(--${projection.status})` }} />
+                  <Sparkles className="w-3.5 h-3.5" style={{ color: projection.status === "healthy" ? "var(--safe)" : `var(--${projection.status})` }} />
                   Safe to Spend
                 </div>
                 

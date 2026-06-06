@@ -7,9 +7,9 @@ interface BalanceChartProps {
 }
 
 const statusColors: Record<BudgetStatus, { line: string; deep: string }> = {
-  healthy: { line: "#10b981", deep: "#065f46" },
-  tight: { line: "#f59e0b", deep: "#b45309" },
-  over: { line: "#ef4444", deep: "#991b1b" },
+  healthy: { line: "#00f29f", deep: "#00bc7b" },
+  tight: { line: "#ffaa00", deep: "#d97706" },
+  over: { line: "#ff4560", deep: "#dc2626" },
 };
 
 export default function BalanceChart({ data, status }: BalanceChartProps) {
