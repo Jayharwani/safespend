@@ -24,10 +24,19 @@ export interface AppData {
   payFrequency: PayFrequency;
   bills: Bill[];
   oneOffs: OneOffEntry[];
+  welcomeSeen: boolean;
+  onboardingComplete: boolean;
+  signedUp: boolean;
+  permissionsSeen: boolean;
+  allSetSeen: boolean;
+  lastPaydayCelebrated: string;
   setupComplete: boolean;
 }
 
-export type BudgetStatus = "healthy" | "tight" | "danger";
+export type OverlayScreen = "spend-log" | "payday" | null;
+
+export type BudgetStatus = "healthy" | "tight" | "over";
+export type TabId = "today" | "plan" | "settings";
 
 export interface DayProjection {
   date: Date;

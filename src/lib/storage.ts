@@ -9,6 +9,12 @@ export const defaultData: AppData = {
   payFrequency: "fortnightly",
   bills: [],
   oneOffs: [],
+  welcomeSeen: false,
+  onboardingComplete: false,
+  signedUp: false,
+  permissionsSeen: false,
+  allSetSeen: false,
+  lastPaydayCelebrated: "",
   setupComplete: false,
 };
 
@@ -16,7 +22,17 @@ export function loadData(): AppData {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return { ...defaultData };
-    return { ...defaultData, ...JSON.parse(raw) };
+    const parsed = { ...defaultData, ...JSON.parse(raw) };
+    if (parsed.setupComplete) {
+      if (!parsed.welcomeSeen) parsed.welcomeSeen = true;
+      if (!parsed.onboardingComplete) parsed.onboardingComplete = true;
+      if (!parsed.signedUp) parsed.signedUp = true;
+      if (!parsed.permissionsSeen) parsed.permissionsSeen = true;
+      if (!parsed.allSetSeen) parsed.allSetSeen = true;
+    } else if (parsed.welcomeSeen && !parsed.onboardingComplete) {
+      parsed.onboardingComplete = true;
+    }
+    return parsed;
   } catch {
     return { ...defaultData };
   }

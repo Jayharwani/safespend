@@ -21,6 +21,12 @@ export function getDemoData(scenario: "healthy" | "tight" | "danger"): AppData {
     payFrequency: "fortnightly",
     bills: makeBills(),
     oneOffs: [],
+    welcomeSeen: true,
+    onboardingComplete: true,
+    signedUp: true,
+    permissionsSeen: true,
+    allSetSeen: true,
+    lastPaydayCelebrated: "",
     setupComplete: true,
   };
   return base;

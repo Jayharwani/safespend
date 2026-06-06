@@ -128,7 +128,7 @@ export function projectBudget(data: AppData, today = new Date()): BudgetProjecti
 
   let status: BudgetStatus = "healthy";
   if (goesNegative || safeToSpend < 0) {
-    status = "danger";
+    status = "over";
   } else if (safeToSpend < 150 || dailyAllowance < 30 || lowestBalance < 100) {
     status = "tight";
   }
