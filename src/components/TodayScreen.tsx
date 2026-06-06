@@ -130,6 +130,25 @@ export default function TodayScreen({
                   <StatePill status={projection.status} />
                   <span className="text-[13px] text-secondary font-medium">{subcopy}</span>
                 </div>
+
+                {/* Lowest Point Warning Alert */}
+                <div className="mt-4 pt-4 border-t border-border-subtle relative z-[1] text-[13px]">
+                  {projection.status === "healthy" && (
+                    <p className="text-secondary">
+                      Lowest projected balance: <strong className="font-semibold text-primary">{formatMoney(projection.lowestBalance)}</strong> on {projection.lowestBalanceLabel}
+                    </p>
+                  )}
+                  {projection.status === "tight" && (
+                    <p className="text-tight font-medium">
+                      ⚠️ Heads up — on {projection.lowestBalanceLabel}, your balance will dip to <strong className="font-bold">{formatMoney(projection.lowestBalance)}</strong>
+                    </p>
+                  )}
+                  {projection.status === "over" && (
+                    <p className="text-over font-semibold">
+                      🚨 Alert — you will be <strong className="font-bold">{formatMoney(Math.abs(projection.lowestBalance))}</strong> short on {projection.lowestBalanceLabel}
+                    </p>
+                  )}
+                </div>
               </>
             )}
 
