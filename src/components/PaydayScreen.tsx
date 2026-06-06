@@ -20,7 +20,7 @@ export default function PaydayScreen({ safeToSpend, onDismiss }: PaydayScreenPro
       scalar: 0.95,
       ticks: 180,
       origin: { y: 0.4 },
-      colors: ["#436e5d", "#689d86", "#ecf2ef", "#c58852"],
+      colors: ["#3b5e8c", "#5e89c3", "#eef3f8", "#d68a47"],
     });
   }, []);
 
