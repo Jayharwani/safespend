@@ -1,5 +1,9 @@
 export type PayFrequency = "weekly" | "fortnightly" | "monthly";
 
+export type CurrencyCode = "USD" | "INR" | "GBP" | "EUR";
+
+export type WeekStart = "monday" | "sunday";
+
 export type EntryType = "bill" | "income" | "spend";
 
 export interface Bill {
@@ -32,6 +36,8 @@ export interface AppData {
   lastPaydayCelebrated: string;
   lastNotified: string;
   setupComplete: boolean;
+  currency: CurrencyCode;
+  weekStart: WeekStart;
 }
 
 export type OverlayScreen = "insights" | "payday" | null;

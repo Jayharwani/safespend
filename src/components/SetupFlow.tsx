@@ -4,7 +4,7 @@ import { CaretLeft, Plus, Trash, Wallet, CalendarBlank, Receipt } from "../lib/i
 import { motion, AnimatePresence } from "framer-motion";
 import type { AppData, Bill, PayFrequency } from "../types";
 import { generateId } from "../lib/storage";
-import { formatMoney } from "../lib/finance";
+import { formatMoney, currencySymbol } from "../lib/finance";
 import { easeOut } from "../lib/motion";
 import AuroraBackground from "./AuroraBackground";
 
@@ -190,8 +190,7 @@ export default function SetupFlow({ onComplete }: SetupFlowProps) {
                       className="wordmark"
                       style={{ fontSize: 44, fontWeight: 600 }}
                     >
-                      $
-                    </span>
+                      {currencySymbol()}                    </span>
                     <input
                       type="number"
                       inputMode="decimal"
@@ -220,8 +219,7 @@ export default function SetupFlow({ onComplete }: SetupFlowProps) {
                             fontWeight: 600,
                           }}
                         >
-                          $
-                        </span>
+                          {currencySymbol()}                        </span>
                         <input
                           type="number"
                           inputMode="decimal"
@@ -366,8 +364,7 @@ export default function SetupFlow({ onComplete }: SetupFlowProps) {
                                 fontWeight: 600,
                               }}
                             >
-                              $
-                            </span>
+                              {currencySymbol()}                            </span>
                             <input
                               type="number"
                               inputMode="decimal"

@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { X, Trash, CalendarBlank } from "../lib/icons";
 import type { Bill, PayFrequency } from "../types";
 import { springSoft } from "../lib/motion";
+import { currencySymbol } from "../lib/finance";
 
 export type EditTarget =
   | { kind: "balance"; balance: number }
@@ -178,8 +179,7 @@ export default function EditSheet({
                       fontWeight: 600,
                     }}
                   >
-                    $
-                  </span>
+                    {currencySymbol()}                  </span>
                   <input
                     type="number"
                     inputMode="decimal"

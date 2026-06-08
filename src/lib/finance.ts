@@ -8,7 +8,13 @@ import {
   isSameDay,
   startOfDay,
 } from "date-fns";
-import type { AppData, BudgetProjection, BudgetStatus, DayProjection } from "../types";
+import type {
+  AppData,
+  BudgetProjection,
+  BudgetStatus,
+  CurrencyCode,
+  DayProjection,
+} from "../types";
 
 function nextOccurrence(dayOfMonth: number, from: Date): Date {
   const fromStart = startOfDay(from);
@@ -150,11 +156,57 @@ export function projectBudget(data: AppData, today = new Date()): BudgetProjecti
   };
 }
 
+/* ------------------------------------------------------------------ */
+/* Currency + locale formatting                                        */
+/* ------------------------------------------------------------------ */
+
+const CURRENCY_LOCALE: Record<CurrencyCode, { locale: string; currency: string }> = {
+  USD: { locale: "en-US", currency: "USD" },
+  INR: { locale: "en-IN", currency: "INR" },
+  GBP: { locale: "en-GB", currency: "GBP" },
+  EUR: { locale: "en-IE", currency: "EUR" },
+};
+
+export const CURRENCIES: { code: CurrencyCode; symbol: string; label: string }[] = [
+  { code: "USD", symbol: "$", label: "US Dollar" },
+  { code: "INR", symbol: "₹", label: "Indian Rupee" },
+  { code: "GBP", symbol: "£", label: "British Pound" },
+  { code: "EUR", symbol: "€", label: "Euro" },
+];
+
+// Module-level active currency so every formatMoney() call site stays simple.
+let activeCurrency: CurrencyCode = "USD";
+
+export function setCurrency(code: CurrencyCode): void {
+  if (CURRENCY_LOCALE[code]) activeCurrency = code;
+}
+
+export function currencySymbol(code: CurrencyCode = activeCurrency): string {
+  const { locale, currency } = CURRENCY_LOCALE[code] ?? CURRENCY_LOCALE.USD;
+  try {
+    const parts = new Intl.NumberFormat(locale, {
+      style: "currency",
+      currency,
+    }).formatToParts(0);
+    return parts.find((p) => p.type === "currency")?.value ?? "$";
+  } catch {
+    return "$";
+  }
+}
+
 export function formatMoney(amount: number): string {
-  const abs = Math.abs(amount);
-  const formatted = abs.toLocaleString("en-US", {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  });
-  return amount < 0 ? `−$${formatted}` : `$${formatted}`;
+  const { locale, currency } = CURRENCY_LOCALE[activeCurrency] ?? CURRENCY_LOCALE.USD;
+  const abs = Math.abs(Math.round(amount || 0));
+  let formatted: string;
+  try {
+    formatted = new Intl.NumberFormat(locale, {
+      style: "currency",
+      currency,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(abs);
+  } catch {
+    formatted = `$${abs.toLocaleString("en-US")}`;
+  }
+  return amount < 0 ? `−${formatted}` : formatted;
 }

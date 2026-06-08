@@ -55,6 +55,8 @@ export function getDemoData(scenario: "healthy" | "tight" | "danger"): AppData {
     lastPaydayCelebrated: "",
     lastNotified: "",
     setupComplete: true,
+    currency: "USD",
+    weekStart: "monday",
   };
   return base;
 }

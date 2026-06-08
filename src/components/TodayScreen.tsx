@@ -46,6 +46,10 @@ export default function TodayScreen({
   const paydayLabel = format(new Date(data.nextPayday), "MMM d");
   const ChipIcon = status === "healthy" ? Check : Warning;
 
+  // Shrink the hero number for very large / long values so it never overflows.
+  const heroStr = formatMoney(safeToSpend);
+  const heroFont = heroStr.length > 12 ? 38 : heroStr.length > 9 ? 50 : 64;
+
   return (
     <>
       <motion.div
@@ -92,8 +96,12 @@ export default function TodayScreen({
                 value={safeToSpend}
                 format={formatMoney}
                 className="num"
-                style={{ color: stateColor[status], transition: "color 0.5s var(--ease-out)" }}
-                aria-label={`Safe to spend: ${safeToSpend} dollars until ${paydayLabel}, ${status}.`}
+                style={{
+                  color: stateColor[status],
+                  fontSize: heroFont,
+                  transition: "color 0.5s var(--ease-out)",
+                }}
+                aria-label={`Safe to spend: ${heroStr} until ${paydayLabel}. ${chipText[status]}.`}
               />
               <p className="sub">
                 {daysUntilPayday > 0 ? (

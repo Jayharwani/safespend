@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { X, CalendarBlank } from "../lib/icons";
 import type { EntryType } from "../types";
 import { springSoft } from "../lib/motion";
+import { currencySymbol } from "../lib/finance";
 
 export interface SheetEntry {
   name: string;
@@ -210,8 +211,7 @@ export default function EntrySheet({ open, onClose, onSubmit, initial }: EntrySh
                       fontSize: 17,
                     }}
                   >
-                    $
-                  </span>
+                    {currencySymbol()}                  </span>
                   <input
                     id="entry-amount"
                     type="number"

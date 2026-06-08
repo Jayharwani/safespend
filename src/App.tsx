@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, lazy, Suspense } from "react";
 import { format, isSameDay, parseISO } from "date-fns";
 import { AnimatePresence } from "framer-motion";
 import type { AppData, Bill, OverlayScreen, PayFrequency, TabId } from "./types";
 import { defaultData, generateId } from "./lib/storage";
 import { initData, persist, clearData, exportData, parseImport } from "./lib/db";
-import { projectBudget } from "./lib/finance";
+import { projectBudget, setCurrency } from "./lib/finance";
+import type { CurrencyCode, WeekStart } from "./types";
 import { getDemoData } from "./lib/demos";
 import { getHeadsUp } from "./lib/headsup";
 import {
@@ -27,8 +28,9 @@ import AllSetScreen from "./components/AllSetScreen";
 import TodayScreen from "./components/TodayScreen";
 import PlanScreen from "./components/PlanScreen";
 import MenuScreen from "./components/MenuScreen";
-import InsightsScreen from "./components/InsightsScreen";
-import PaydayScreen from "./components/PaydayScreen";
+// Lazy-loaded: defers the Insights chart and the confetti library until used.
+const InsightsScreen = lazy(() => import("./components/InsightsScreen"));
+const PaydayScreen = lazy(() => import("./components/PaydayScreen"));
 import EntrySheet, { type SheetEntry } from "./components/EntrySheet";
 import EditSheet, { type EditTarget } from "./components/EditSheet";
 import Toast from "./components/Toast";
@@ -63,6 +65,7 @@ export default function App() {
     let alive = true;
     initData().then((loaded) => {
       if (alive) {
+        setCurrency(loaded.currency); // before first render so money formats correctly
         setData(loaded);
         setHydrated(true);
       }
@@ -71,6 +74,11 @@ export default function App() {
       alive = false;
     };
   }, []);
+
+  // Keep the active currency in sync when the preference changes.
+  useEffect(() => {
+    setCurrency(data.currency);
+  }, [data.currency]);
 
   useEffect(() => {
     if (!data.setupComplete || showSplash) return;
@@ -283,7 +291,9 @@ export default function App() {
   if (overlay === "insights") {
     return (
       <PageTransition id="insights">
-        <InsightsScreen data={data} onBack={() => setOverlay(null)} />
+        <Suspense fallback={<div className="app-shell" />}>
+          <InsightsScreen data={data} onBack={() => setOverlay(null)} />
+        </Suspense>
       </PageTransition>
     );
   }
@@ -319,6 +329,10 @@ export default function App() {
               notifPerm={notifPerm}
               onEnableNotifications={handleEnableNotifications}
               onTestNotification={handleTestNotification}
+              currency={data.currency}
+              weekStart={data.weekStart}
+              onSetCurrency={(c: CurrencyCode) => updateData({ currency: c })}
+              onSetWeekStart={(w: WeekStart) => updateData({ weekStart: w })}
               onLoadDemo={handleLoadDemo}
               onPreviewPayday={() => setShowPayday(true)}
             />
@@ -346,7 +360,9 @@ export default function App() {
 
       <AnimatePresence>
         {showPayday && (
-          <PaydayScreen safeToSpend={projection.safeToSpend} onDismiss={dismissPayday} />
+          <Suspense fallback={null}>
+            <PaydayScreen safeToSpend={projection.safeToSpend} onDismiss={dismissPayday} />
+          </Suspense>
         )}
       </AnimatePresence>
     </>

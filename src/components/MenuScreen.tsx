@@ -9,9 +9,14 @@ import {
   UploadSimple,
   Bell,
   Check,
+  ShieldCheck,
 } from "../lib/icons";
 import { staggerContainer, staggerItem } from "../lib/motion";
 import type { NotifyState } from "../lib/notify";
+import { CURRENCIES } from "../lib/finance";
+import type { CurrencyCode, WeekStart } from "../types";
+
+const APP_VERSION = typeof __APP_VERSION__ !== "undefined" ? __APP_VERSION__ : "1.0.0";
 
 interface MenuScreenProps {
   onOpenInsights: () => void;
@@ -21,6 +26,10 @@ interface MenuScreenProps {
   notifPerm: NotifyState;
   onEnableNotifications: () => void;
   onTestNotification: () => void;
+  currency: CurrencyCode;
+  weekStart: WeekStart;
+  onSetCurrency: (c: CurrencyCode) => void;
+  onSetWeekStart: (w: WeekStart) => void;
   onLoadDemo: (scenario: "healthy" | "tight" | "danger") => void;
   onPreviewPayday: () => void;
 }
@@ -39,6 +48,10 @@ export default function MenuScreen({
   notifPerm,
   onEnableNotifications,
   onTestNotification,
+  currency,
+  weekStart,
+  onSetCurrency,
+  onSetWeekStart,
   onLoadDemo,
   onPreviewPayday,
 }: MenuScreenProps) {
@@ -221,6 +234,73 @@ export default function MenuScreen({
           />
         </motion.section>
 
+        {/* Preferences */}
+        <motion.section variants={staggerItem} style={{ padding: "20px 24px 0" }}>
+          <p className="section-header">Preferences</p>
+          <div className="card" style={{ padding: "16px 18px" }}>
+            <p style={{ fontSize: 14, fontWeight: 600, marginBottom: 10 }}>Currency</p>
+            <div className="segmented" role="tablist" aria-label="Currency">
+              {CURRENCIES.map((c) => (
+                <button
+                  key={c.code}
+                  type="button"
+                  role="tab"
+                  aria-selected={currency === c.code}
+                  aria-label={c.label}
+                  onClick={() => onSetCurrency(c.code)}
+                  style={{ position: "relative", height: 40 }}
+                >
+                  {currency === c.code && (
+                    <motion.span
+                      layoutId="currency-pill"
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        borderRadius: 8,
+                        background: "var(--surface)",
+                        boxShadow: "var(--shadow-sm)",
+                        zIndex: -1,
+                      }}
+                      transition={{ type: "spring", stiffness: 420, damping: 36 }}
+                    />
+                  )}
+                  {c.symbol}
+                </button>
+              ))}
+            </div>
+
+            <p style={{ fontSize: 14, fontWeight: 600, margin: "18px 0 10px" }}>Week starts on</p>
+            <div className="segmented" role="tablist" aria-label="Week start">
+              {(["monday", "sunday"] as const).map((w) => (
+                <button
+                  key={w}
+                  type="button"
+                  role="tab"
+                  aria-selected={weekStart === w}
+                  onClick={() => onSetWeekStart(w)}
+                  style={{ position: "relative", height: 40 }}
+                >
+                  {weekStart === w && (
+                    <motion.span
+                      layoutId="weekstart-pill"
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        borderRadius: 8,
+                        background: "var(--surface)",
+                        boxShadow: "var(--shadow-sm)",
+                        zIndex: -1,
+                      }}
+                      transition={{ type: "spring", stiffness: 420, damping: 36 }}
+                    />
+                  )}
+                  {w === "monday" ? "Monday" : "Sunday"}
+                </button>
+              ))}
+            </div>
+          </div>
+        </motion.section>
+
         <motion.section variants={staggerItem} style={{ padding: "20px 24px 0" }}>
           <div className="card" style={{ padding: 0 }}>
             <button
@@ -294,6 +374,31 @@ export default function MenuScreen({
           </motion.section>
         )}
 
+        {/* About + privacy */}
+        <motion.section variants={staggerItem} style={{ padding: "28px 24px 0" }}>
+          <p className="section-header">About</p>
+          <div className="card" style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+            <span className="chip-ico">
+              <ShieldCheck size={20} weight="duotone" />
+            </span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ fontSize: 15, fontWeight: 600 }}>Private by design</p>
+              <p
+                style={{
+                  fontSize: 13,
+                  color: "var(--ink-soft)",
+                  lineHeight: 1.5,
+                  marginTop: 4,
+                }}
+              >
+                Your data lives only on this device. Headroom has no account and no
+                server, and never sends your numbers anywhere. Clearing your browser
+                data or removing the app deletes it — so keep a backup with Export.
+              </p>
+            </div>
+          </div>
+        </motion.section>
+
         <motion.p
           variants={staggerItem}
           style={{
@@ -301,10 +406,10 @@ export default function MenuScreen({
             fontSize: 12,
             color: "var(--ink-faint)",
             fontWeight: 500,
-            padding: "32px 24px 8px",
+            padding: "20px 24px 8px",
           }}
         >
-          Headroom · stored locally on this device.
+          Headroom v{APP_VERSION} · stored locally on this device
         </motion.p>
       </div>
     </motion.div>

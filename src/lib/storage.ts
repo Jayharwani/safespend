@@ -18,6 +18,8 @@ export const defaultData: AppData = {
   lastPaydayCelebrated: "",
   lastNotified: "",
   setupComplete: false,
+  currency: "USD",
+  weekStart: "monday",
 };
 
 export function generateId(): string {
