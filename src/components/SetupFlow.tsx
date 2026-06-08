@@ -402,17 +402,25 @@ export default function SetupFlow({ onComplete }: SetupFlowProps) {
                               Day
                             </span>
                             <input
-                              type="number"
+                              type="text"
                               inputMode="numeric"
-                              min={1}
-                              max={31}
-                              value={bill.dayOfMonth}
+                              aria-label="Due day of month (1 to 31)"
+                              value={bill.dayOfMonth || ""}
+                              onFocus={(e) => e.target.select()}
                               onChange={(e) =>
                                 updateBill(bill.id, {
-                                  dayOfMonth: Math.min(31, Math.max(1, Number(e.target.value) || 1)),
+                                  dayOfMonth: Number(
+                                    e.target.value.replace(/[^0-9]/g, "").slice(0, 2)
+                                  ) || 0,
+                                })
+                              }
+                              onBlur={() =>
+                                updateBill(bill.id, {
+                                  dayOfMonth: Math.min(31, Math.max(1, bill.dayOfMonth || 1)),
                                 })
                               }
                               className="money"
+                              placeholder="1"
                               style={{
                                 width: 36,
                                 background: "transparent",

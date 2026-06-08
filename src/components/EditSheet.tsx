@@ -38,7 +38,9 @@ export default function EditSheet({
   const [name, setName] = useState("");
   const [freq, setFreq] = useState<PayFrequency>("fortnightly");
   const [date, setDate] = useState(format(new Date(), "yyyy-MM-dd"));
-  const [day, setDay] = useState(1);
+  const [day, setDay] = useState("1");
+
+  const clampDay = (v: string) => Math.min(31, Math.max(1, parseInt(v, 10) || 1));
 
   useEffect(() => {
     if (!target) return;
@@ -51,7 +53,7 @@ export default function EditSheet({
     } else {
       setName(target.bill.name);
       setAmount(String(target.bill.amount || ""));
-      setDay(target.bill.dayOfMonth);
+      setDay(String(target.bill.dayOfMonth));
     }
   }, [target]);
 
@@ -85,7 +87,12 @@ export default function EditSheet({
     else if (target.kind === "paycheck")
       onSavePaycheck({ payAmount: Number(amount), payFrequency: freq, nextPayday: date });
     else
-      onSaveBill({ id: target.bill.id, name: name.trim(), amount: Number(amount), dayOfMonth: day });
+      onSaveBill({
+        id: target.bill.id,
+        name: name.trim(),
+        amount: Number(amount),
+        dayOfMonth: clampDay(day),
+      });
     onClose();
   };
 
@@ -261,16 +268,19 @@ export default function EditSheet({
                 <div className="field">
                   <label>Due day of month</label>
                   <input
-                    type="number"
+                    type="text"
                     inputMode="numeric"
-                    min={1}
-                    max={31}
                     value={day}
-                    onChange={(e) =>
-                      setDay(Math.min(31, Math.max(1, Number(e.target.value) || 1)))
-                    }
+                    onFocus={(e) => e.target.select()}
+                    onChange={(e) => setDay(e.target.value.replace(/[^0-9]/g, "").slice(0, 2))}
+                    onBlur={() => setDay(String(clampDay(day)))}
                     className="money"
+                    placeholder="1"
+                    aria-label="Due day of month (1 to 31)"
                   />
+                  <p style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 6, paddingLeft: 4 }}>
+                    The day each month this bill is due (1–31).
+                  </p>
                 </div>
               )}
 
