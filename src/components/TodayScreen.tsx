@@ -1,299 +1,198 @@
 import { format } from "date-fns";
 import { motion } from "framer-motion";
-import { List, Plus, Settings, Sparkles, Calendar, DollarSign } from "lucide-react";
+import { Check, Warning, Plus } from "../lib/icons";
 import type { AppData, BudgetProjection, BudgetStatus } from "../types";
 import { formatMoney } from "../lib/finance";
 import { getBillIcon } from "../lib/billIcon";
 import { timeGreeting } from "../lib/greeting";
 import { staggerContainer, staggerItem } from "../lib/motion";
 import AnimatedNumber from "./AnimatedNumber";
-import BalanceChart from "./BalanceChart";
-import EmptyBillsIllustration from "./illustrations/EmptyBillsIllustration";
-import PaydayMeter from "./PaydayMeter";
-import PaydayRing from "./PaydayRing";
-import SparkleField from "./SparkleField";
-import StatePill from "./StatePill";
-import TiltCard from "./TiltCard";
 
 interface TodayScreenProps {
   data: AppData;
   projection: BudgetProjection;
-  onLogSpend: () => void;
-  onOpenSpendLog: () => void;
-  onOpenSettings: () => void;
+  onAdd: () => void;
+  onEditBalance: () => void;
 }
 
-const statusSubcopy = {
-  healthy: (amount: string) => `You are well within your safe zone with ${amount} left.`,
-  tight: (amount: string, date: string) =>
-    `Flowing slightly tight — you have ${amount} left until ${date}.`,
-  over: (short: string) =>
-    `Careful — you'll be about ${short} short before payday. Consider adjusting.`,
+const chipText: Record<BudgetStatus, string> = {
+  healthy: "On track",
+  tight: "Getting tight",
+  over: "Heads up",
 };
 
-const heroStatusClass: Record<BudgetStatus, string> = {
-  healthy: "hero-panel--healthy",
-  tight: "hero-panel--tight",
-  over: "hero-panel--over",
+const chipClass: Record<BudgetStatus, string> = {
+  healthy: "chip",
+  tight: "chip chip--tight",
+  over: "chip chip--over",
 };
 
-export default function TodayScreen({
-  data,
-  projection,
-  onLogSpend,
-  onOpenSpendLog,
-  onOpenSettings,
-}: TodayScreenProps) {
-  const { safeToSpend, dailyAllowance, daysUntilPayday, upcomingBills } = projection;
+const stateColor: Record<BudgetStatus, string> = {
+  healthy: "var(--accent)",
+  tight: "var(--tight)",
+  over: "var(--over)",
+};
+
+export default function TodayScreen({ data, projection, onAdd, onEditBalance }: TodayScreenProps) {
+  const { safeToSpend, dailyAllowance, daysUntilPayday, upcomingBills, status } = projection;
   const paydayLabel = format(new Date(data.nextPayday), "MMM d");
-
-  const subcopy =
-    projection.status === "healthy"
-      ? statusSubcopy.healthy(formatMoney(safeToSpend))
-      : projection.status === "tight"
-        ? statusSubcopy.tight(formatMoney(safeToSpend), paydayLabel)
-        : statusSubcopy.over(formatMoney(Math.abs(projection.lowestBalance)));
-
-  const noBills = data.bills.length === 0 && upcomingBills.length === 0;
+  const ChipIcon = status === "healthy" ? Check : Warning;
 
   return (
-    <motion.div
-      className="flex-1 flex flex-col tab-content"
-      variants={staggerContainer}
-      initial="initial"
-      animate="animate"
-    >
-      <div className="flex-1 overflow-y-auto px-5 pt-4 pb-32 space-y-6">
-        {/* Header */}
-        <motion.header variants={staggerItem} className="flex justify-between items-center">
-          <div>
-            <p className="text-[12px] font-semibold uppercase tracking-wider text-secondary">
-              {timeGreeting()} · {format(new Date(), "EEEE, MMM d")}
+    <>
+      <motion.div
+        className="flex-1 flex flex-col"
+        variants={staggerContainer}
+        initial="initial"
+        animate="animate"
+      >
+        <div className="flex-1 overflow-y-auto" style={{ paddingBottom: 150 }}>
+          {/* 1 — Greeting + date */}
+          <motion.header variants={staggerItem} style={{ padding: "24px 24px 8px" }}>
+            <p style={{ fontSize: 14, color: "var(--ink-faint)", fontWeight: 600 }}>
+              {timeGreeting()}
             </p>
-            <h1 className="text-[32px] font-bold tracking-tight text-primary leading-tight mt-0.5">Today</h1>
-          </div>
-          <div className="flex items-center gap-3">
-            <PaydayRing
-              daysUntil={daysUntilPayday}
-              payFrequency={data.payFrequency}
-              status={projection.status}
-            />
-            <button
-              type="button"
-              onClick={onOpenSettings}
-              className="w-10 h-10 rounded-full bg-surface border border-border-subtle shadow-e1 flex items-center justify-center text-secondary hover:text-primary transition-colors cursor-pointer"
-              aria-label="Settings"
-            >
-              <Settings className="w-5 h-5" strokeWidth={1.75} />
-            </button>
-          </div>
-        </motion.header>
+            <p style={{ fontSize: 16, color: "var(--ink)", fontWeight: 600, marginTop: 2 }}>
+              {format(new Date(), "EEEE, MMMM d")}
+            </p>
+          </motion.header>
 
-        {/* Hero Card */}
-        <motion.div variants={staggerItem}>
-          <TiltCard className={`hero-panel ${heroStatusClass[projection.status]}`}>
-            <SparkleField active={projection.status === "healthy"} />
-
-            {noBills ? (
-              <div className="text-center py-6 relative z-[1]">
-                <EmptyBillsIllustration />
-                <p className="text-[18px] font-bold mb-1">Add your bills to forecast</p>
-                <p className="text-[14px] text-secondary mb-6 max-w-[260px] mx-auto">
-                  Your current balance is {formatMoney(data.balance)}. Add bills to see what's safe to spend.
-                </p>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center py-2 relative z-[1]">
-                <div className="flex items-center gap-1.5 text-[12px] font-bold uppercase tracking-wider text-secondary">
-                  <Sparkles className="w-3.5 h-3.5" style={{ color: projection.status === "healthy" ? "var(--safe)" : `var(--${projection.status})` }} />
-                  Safe to Spend
-                </div>
-                
-                {/* Glowing Odometer-style animated main number */}
-                <motion.div
-                  animate={{ scale: [0.97, 1] }}
-                  transition={{ type: "spring", stiffness: 220, damping: 22 }}
-                  className="my-2"
-                >
-                  <AnimatedNumber
-                    value={safeToSpend}
-                    format={formatMoney}
-                    className={`text-[64px] leading-none font-bold tracking-[-2%] text-glow-${projection.status}`}
-                    aria-label={`Safe to spend: ${safeToSpend} dollars until ${paydayLabel}`}
-                  />
-                </motion.div>
-
-                {/* Sleek Daily Breakdown Pill */}
-                {daysUntilPayday > 0 ? (
-                  <span className="inline-flex items-center gap-1 bg-white/5 border border-white/10 rounded-full px-3 py-1 text-[13px] font-semibold text-secondary">
-                    ≈ {formatMoney(dailyAllowance)} / day
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center bg-white/5 border border-white/10 rounded-full px-3 py-1 text-[13px] font-semibold text-secondary">
-                    Payday is today!
-                  </span>
-                )}
-
-                <div className="mt-5 w-full pt-4 border-t border-white/5 relative z-[1] flex items-center justify-between">
-                  <StatePill status={projection.status} />
-                  <span className="text-[13px] text-secondary font-medium">{subcopy}</span>
-                </div>
-
-                {/* Lowest Point Warning Alert */}
-                <div className="mt-4 w-full pt-4 border-t border-white/5 relative z-[1] text-[13px]">
-                  {projection.status === "healthy" && (
-                    <p className="text-secondary">
-                      Lowest projected balance: <strong className="font-semibold text-primary">{formatMoney(projection.lowestBalance)}</strong> on {projection.lowestBalanceLabel}
-                    </p>
-                  )}
-                  {projection.status === "tight" && (
-                    <p className="text-tight font-medium">
-                      ⚠️ Heads up — on {projection.lowestBalanceLabel}, your balance will dip to <strong className="font-bold">{formatMoney(projection.lowestBalance)}</strong>
-                    </p>
-                  )}
-                  {projection.status === "over" && (
-                    <p className="text-over font-semibold">
-                      🚨 Alert — you will be <strong className="font-bold">{formatMoney(Math.abs(projection.lowestBalance))}</strong> short on {projection.lowestBalanceLabel}
-                    </p>
-                  )}
-                </div>
-              </div>
-            )}
-
-            <div className="relative z-[1] mt-5">
-              <PaydayMeter
-                daysUntil={daysUntilPayday}
-                nextPayday={data.nextPayday}
-                status={projection.status}
-              />
-            </div>
-          </TiltCard>
-        </motion.div>
-
-        {/* Actions Group right below the Hero card */}
-        <motion.div variants={staggerItem} className="flex gap-3">
-          <button
-            type="button"
-            onClick={onLogSpend}
-            className="btn-primary flex-1 h-[52px]"
-          >
-            <Plus className="w-5 h-5" strokeWidth={2.25} />
-            Log a spend
-          </button>
-        </motion.div>
-
-        {!noBills && (
-          <>
-            {/* Bento Grid Stats */}
-            <motion.div variants={staggerItem} className="grid grid-cols-2 gap-4">
-              <div className="rich-card flex flex-col justify-between p-5 min-h-[110px]">
-                <div className="flex justify-between items-start">
-                  <span className="text-[12px] font-bold uppercase tracking-wider text-secondary">
-                    Daily Limit
-                  </span>
-                  <div className="w-7 h-7 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-brand">
-                    <DollarSign className="w-4 h-4" />
-                  </div>
-                </div>
-                <div>
-                  <p className="money text-[22px] font-bold mt-2 leading-none">
-                    {daysUntilPayday > 0 ? formatMoney(dailyAllowance) : formatMoney(safeToSpend)}
-                  </p>
-                  <p className="text-[11px] text-secondary mt-1">per day remaining</p>
-                </div>
-              </div>
-
-              <div className="rich-card flex flex-col justify-between p-5 min-h-[110px]">
-                <div className="flex justify-between items-start">
-                  <span className="text-[12px] font-bold uppercase tracking-wider text-secondary">
-                    Payday In
-                  </span>
-                  <div className="w-7 h-7 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-brand">
-                    <Calendar className="w-4 h-4" />
-                  </div>
-                </div>
-                <div>
-                  <p className="money text-[22px] font-bold mt-2 leading-none">
-                    {daysUntilPayday} Day{daysUntilPayday !== 1 ? "s" : ""}
-                  </p>
-                  <p className="text-[11px] text-secondary mt-1">until {paydayLabel}</p>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Balance Forecast Chart */}
-            <motion.section variants={staggerItem} className="rich-card">
-              <div className="flex justify-between items-center mb-4">
-                <div>
-                  <h3 className="text-[14px] font-bold uppercase tracking-wider text-secondary">
-                    Forecast Trend
-                  </h3>
-                  <p className="text-[12px] text-secondary mt-0.5">
-                    Projected balance trajectory
-                  </p>
-                </div>
-                <span className="money text-[14px] font-semibold text-secondary bg-white/5 px-3 py-1 rounded-full border border-border-subtle">
-                  Bank: {formatMoney(data.balance)}
+          {/* 2 — Hero */}
+          <motion.section variants={staggerItem} style={{ padding: "12px 20px 0" }}>
+            <div className="hero">
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <p className="label">Safe to spend</p>
+                <span className={chipClass[status]}>
+                  <ChipIcon size={13} weight="bold" />
+                  {chipText[status]}
                 </span>
               </div>
-              <BalanceChart data={projection.chartData} status={projection.status} />
-            </motion.section>
+              <AnimatedNumber
+                value={safeToSpend}
+                format={formatMoney}
+                className="num"
+                style={{ color: stateColor[status], transition: "color 0.5s var(--ease-out)" }}
+                aria-label={`Safe to spend: ${safeToSpend} dollars until ${paydayLabel}, ${status}.`}
+              />
+              <p className="sub">
+                {daysUntilPayday > 0 ? (
+                  <>
+                    <strong style={{ color: "var(--ink)", fontWeight: 600 }}>
+                      {formatMoney(dailyAllowance)}
+                    </strong>{" "}
+                    a day · {daysUntilPayday} days to payday
+                  </>
+                ) : (
+                  "Payday is today"
+                )}
+              </p>
+            </div>
+          </motion.section>
 
-            {/* Upcoming Bills */}
-            <motion.section variants={staggerItem} className="rich-card p-0 overflow-hidden">
-              <div className="flex items-center justify-between px-5 pt-5 pb-2">
-                <div>
-                  <h3 className="text-[14px] font-bold uppercase tracking-wider text-secondary">
-                    Coming Up
-                  </h3>
-                  <p className="text-[12px] text-secondary mt-0.5">Bills before payday</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={onOpenSpendLog}
-                  className="text-brand text-[13px] font-semibold flex items-center gap-1 min-h-[36px] hover:opacity-80 transition-opacity cursor-pointer bg-transparent border-none"
-                >
-                  <List className="w-4 h-4" />
-                  History log
-                </button>
-              </div>
+          {/* 3 — Context line (tappable balance) */}
+          <motion.section variants={staggerItem} style={{ padding: "14px 28px 0" }}>
+            <p style={{ fontSize: 14, color: "var(--ink-soft)" }}>
+              In your account{" "}
+              <button
+                type="button"
+                onClick={onEditBalance}
+                style={{
+                  background: "none",
+                  border: "none",
+                  padding: 0,
+                  font: "inherit",
+                  color: "var(--accent-deep)",
+                  fontWeight: 600,
+                  textDecoration: "underline",
+                  textUnderlineOffset: 3,
+                  textDecorationColor: "var(--accent-line)",
+                }}
+                className="money"
+              >
+                {formatMoney(data.balance)}
+              </button>{" "}
+              · Next pay {paydayLabel}
+            </p>
+          </motion.section>
 
+          {/* 4 — Coming up */}
+          <motion.section variants={staggerItem} style={{ padding: "20px 20px 0" }}>
+            <p className="section-header">Coming up</p>
+            <div className="card" style={{ padding: 0 }}>
               {upcomingBills.length === 0 ? (
-                <p className="text-secondary text-[14px] px-5 py-6">
-                  No upcoming bills before your next paycheck.
+                <p
+                  style={{
+                    fontSize: 15,
+                    color: "var(--ink-soft)",
+                    padding: "20px",
+                    textAlign: "center",
+                  }}
+                >
+                  Nothing due before your next payday.
                 </p>
               ) : (
-                <ul className="divide-y divide-white/5">
+                <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
                   {upcomingBills.map((bill, i) => {
-                    const Icon = getBillIcon(bill.name);
+                    const BillIcon = getBillIcon(bill.name);
                     return (
-                      <li
+                      <motion.li
                         key={`${bill.name}-${bill.dateLabel}-${i}`}
-                        className="flex items-center gap-4 px-5 py-4 hover:bg-white/[0.02] transition-colors"
+                        className="row"
+                        initial={{ opacity: 0, x: -6 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.06 * i, duration: 0.34, ease: [0.16, 1, 0.3, 1] }}
                       >
                         <span className="chip-ico">
-                          <Icon className="w-5 h-5" strokeWidth={2} />
+                          <BillIcon size={20} weight="duotone" />
                         </span>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[16px] font-semibold text-primary truncate">
-                            {bill.name}
-                          </p>
-                          <p className="text-[12px] text-secondary mt-0.5">
-                            {bill.dateLabel}
-                          </p>
+                        <div className="main">
+                          <p>{bill.name}</p>
+                          <p className="sub">{bill.dateLabel}</p>
                         </div>
-                        <span className="money text-[16px] font-bold text-primary">
-                          {formatMoney(bill.amount)}
-                        </span>
-                      </li>
+                        <span className="money amt">{formatMoney(bill.amount)}</span>
+                      </motion.li>
                     );
                   })}
                 </ul>
               )}
-            </motion.section>
-          </>
-        )}
+            </div>
+          </motion.section>
+        </div>
+      </motion.div>
+
+      {/* 5 — Bottom CTA */}
+      <div
+        style={{
+          position: "fixed",
+          left: 0,
+          right: 0,
+          bottom: "calc(80px + env(safe-area-inset-bottom))",
+          maxWidth: 430,
+          margin: "0 auto",
+          padding: "0 20px",
+          zIndex: 30,
+          pointerEvents: "none",
+        }}
+      >
+        <motion.button
+          type="button"
+          onClick={onAdd}
+          className="btn-primary"
+          style={{ pointerEvents: "auto" }}
+          initial={{ y: 24, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.35, type: "spring", stiffness: 320, damping: 28 }}
+        >
+          <Plus size={20} weight="bold" />
+          Add
+        </motion.button>
       </div>
-    </motion.div>
+    </>
   );
 }

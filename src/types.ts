@@ -33,10 +33,10 @@ export interface AppData {
   setupComplete: boolean;
 }
 
-export type OverlayScreen = "spend-log" | "payday" | null;
+export type OverlayScreen = "insights" | "payday" | null;
 
 export type BudgetStatus = "healthy" | "tight" | "over";
-export type TabId = "today" | "plan" | "settings";
+export type TabId = "today" | "plan" | "menu";
 
 export interface DayProjection {
   date: Date;

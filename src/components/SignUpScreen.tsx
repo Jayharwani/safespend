@@ -1,4 +1,8 @@
-import { Mail } from "lucide-react";
+import { EnvelopeSimple, AppleLogo, GoogleLogo } from "../lib/icons";
+import { motion } from "framer-motion";
+import { staggerContainer, staggerItem } from "../lib/motion";
+import AuroraBackground from "./AuroraBackground";
+import Wordmark from "./Wordmark";
 
 interface SignUpScreenProps {
   onGuest: () => void;
@@ -6,71 +10,140 @@ interface SignUpScreenProps {
 
 export default function SignUpScreen({ onGuest }: SignUpScreenProps) {
   return (
-    <div className="app-shell">
-      <div className="flex-1 flex flex-col justify-center px-6 pt-12 pb-8">
-        
-        {/* Title */}
-        <div className="rise mb-8" style={{ animationDelay: "0ms" }}>
-          <h1 className="text-[32px] font-bold tracking-tight text-primary leading-tight">
-            Create your account
-          </h1>
-          <p className="text-secondary text-[14px] mt-1">Setup takes less than a minute.</p>
-        </div>
-
-        {/* Social SSO buttons */}
-        <div className="space-y-3 rise animate-push-in" style={{ animationDelay: "70ms" }}>
-          <button
-            type="button"
-            onClick={onGuest}
-            className="w-full h-[52px] rounded-2xl bg-surface border border-border-subtle hover:bg-canvas/30 font-semibold text-[15px] shadow-sm flex items-center justify-center gap-2 cursor-pointer transition-colors"
+    <>
+      <AuroraBackground />
+      <div className="app-shell">
+        <motion.div
+          variants={staggerContainer}
+          initial="initial"
+          animate="animate"
+          style={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            padding: "32px 24px",
+          }}
+        >
+          <motion.div
+            variants={staggerItem}
+            style={{ display: "flex", justifyContent: "center", marginBottom: 36 }}
           >
-            Continue with Apple
-          </button>
-          <button
-            type="button"
-            onClick={onGuest}
-            className="w-full h-[52px] rounded-2xl bg-surface border border-border-subtle hover:bg-canvas/30 font-semibold text-[15px] shadow-sm flex items-center justify-center gap-2 cursor-pointer transition-colors"
+            <Wordmark size={48} showText={false} />
+          </motion.div>
+
+          <motion.div variants={staggerItem} style={{ marginBottom: 32, textAlign: "center" }}>
+            <h1
+              style={{
+                fontSize: 32,
+                fontWeight: 600,
+                letterSpacing: "-0.03em",
+                lineHeight: 1.1,
+              }}
+            >
+              Welcome to <span className="wordmark">Headroom</span>
+            </h1>
+            <p style={{ fontSize: 15, color: "var(--ink-soft)", marginTop: 10, fontWeight: 500 }}>
+              Less than a minute to set up.
+            </p>
+          </motion.div>
+
+          <motion.div variants={staggerItem} style={{ display: "grid", gap: 10 }}>
+            <button type="button" onClick={onGuest} className="btn-secondary">
+              <AppleLogo size={20} weight="fill" />
+              Continue with Apple
+            </button>
+            <button type="button" onClick={onGuest} className="btn-secondary">
+              <GoogleLogo size={20} weight="bold" />
+              Continue with Google
+            </button>
+          </motion.div>
+
+          <motion.div
+            variants={staggerItem}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 14,
+              margin: "26px 0",
+            }}
           >
-            Continue with Google
-          </button>
-        </div>
+            <div style={{ flex: 1, height: 1, background: "var(--hairline)" }} />
+            <span
+              style={{
+                fontSize: 11,
+                color: "var(--ink-faint)",
+                fontWeight: 700,
+                textTransform: "uppercase",
+                letterSpacing: "0.1em",
+              }}
+            >
+              or
+            </span>
+            <div style={{ flex: 1, height: 1, background: "var(--hairline)" }} />
+          </motion.div>
 
-        {/* Divider */}
-        <div className="flex items-center gap-4 my-7 rise" style={{ animationDelay: "140ms" }}>
-          <div className="flex-1 h-px bg-border-subtle" />
-          <span className="text-[12px] font-bold uppercase tracking-wider text-secondary">or</span>
-          <div className="flex-1 h-px bg-border-subtle" />
-        </div>
-
-        {/* Form Inputs */}
-        <div className="rise space-y-5" style={{ animationDelay: "210ms" }}>
-          <div className="space-y-1.5">
-            <label className="text-[12px] font-bold uppercase tracking-wider text-secondary pl-1 block">
-              Email Address
-            </label>
-            <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-secondary" strokeWidth={2} />
+          <motion.div variants={staggerItem} className="field" style={{ marginBottom: 14 }}>
+            <label htmlFor="signup-email">Email</label>
+            <div style={{ position: "relative" }}>
+              <EnvelopeSimple
+                size={19}
+                weight="regular"
+                style={{
+                  position: "absolute",
+                  left: 18,
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  color: "var(--ink-faint)",
+                }}
+              />
               <input
+                id="signup-email"
                 type="email"
                 placeholder="you@example.com"
-                className="form-input w-full h-[52px] pl-12"
+                style={{ paddingLeft: 46 }}
               />
             </div>
-          </div>
+          </motion.div>
 
-          <button
+          <motion.button
+            variants={staggerItem}
             type="button"
             onClick={onGuest}
-            className="btn-primary w-full h-[52px]"
+            className="btn-primary"
           >
-            Continue as Guest
-          </button>
-          
-          <p className="text-[11px] text-secondary text-center leading-relaxed max-w-[280px] mx-auto">
-            By continuing, you agree to our Terms of Service. No bank connection or credit card required.
-          </p>
-        </div>
+            Continue
+          </motion.button>
+
+          <motion.button
+            variants={staggerItem}
+            type="button"
+            onClick={onGuest}
+            className="btn-text"
+            style={{ marginTop: 12, width: "100%" }}
+          >
+            Continue as guest
+          </motion.button>
+
+          <motion.p
+            variants={staggerItem}
+            style={{
+              fontSize: 12,
+              color: "var(--ink-faint)",
+              textAlign: "center",
+              marginTop: 22,
+              maxWidth: 300,
+              marginInline: "auto",
+              lineHeight: 1.5,
+              fontWeight: 500,
+            }}
+          >
+            By continuing you agree to our terms.
+            <br />
+            No bank connection required.
+          </motion.p>
+        </motion.div>
       </div>
-    </div>
+    </>
   );
 }

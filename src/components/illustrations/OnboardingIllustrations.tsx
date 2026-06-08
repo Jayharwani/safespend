@@ -1,63 +1,102 @@
 type Scene = "balance" | "calendar" | "shield";
 
+/**
+ * Refined duotone line illustrations — jade + ink only.
+ * One consistent stroke weight, one soft surface fill, generous negative space.
+ * No orbs, no glow, no multi-colour gradients.
+ */
 export function OnboardingIllustration({ scene }: { scene: Scene }) {
+  const stroke = "var(--accent)";
+  const surface = "var(--surface-2)";
+  const ink = "var(--ink-faint)";
+  const soft = "var(--accent-soft)";
+  const sw = 2;
+
   if (scene === "balance") {
     return (
-      <svg viewBox="0 0 280 200" className="w-full max-w-[280px] mx-auto" aria-hidden>
-        <ellipse cx="140" cy="100" rx="120" ry="80" fill="var(--brand-soft)" opacity="0.6" />
-        <rect x="70" y="60" width="140" height="90" rx="20" fill="var(--surface)" stroke="var(--hairline)" strokeWidth="1.5" />
-        <text x="140" y="115" textAnchor="middle" fontSize="32" fontWeight="600" fill="var(--brand)" fontFamily="inherit">
-          $885
-        </text>
-        <circle cx="200" cy="55" r="18" fill="var(--tight-bg)" stroke="var(--tight)" strokeWidth="1.5" />
-        <text x="200" y="60" textAnchor="middle" fontSize="14" fill="var(--tight)">−</text>
-        <circle cx="80" cy="55" r="18" fill="var(--brand-soft)" stroke="var(--brand)" strokeWidth="1.5" />
-        <text x="80" y="61" textAnchor="middle" fontSize="16" fill="var(--brand)">$</text>
+      <svg viewBox="0 0 280 220" width="100%" aria-hidden role="img">
+        {/* contact shadow */}
+        <ellipse cx="140" cy="196" rx="78" ry="9" fill="rgba(0,0,0,0.18)" />
+
+        {/* back card */}
+        <rect
+          x="58" y="64" width="150" height="96" rx="16"
+          transform="rotate(-6 133 112)"
+          fill={surface} stroke="var(--hairline)" strokeWidth="1"
+        />
+
+        {/* front card */}
+        <g transform="rotate(4 150 120)">
+          <rect x="74" y="78" width="150" height="96" rx="16" fill={surface} stroke={stroke} strokeWidth={sw} />
+          <rect x="74" y="78" width="150" height="96" rx="16" fill={soft} />
+          <text x="149" y="128" textAnchor="middle" fontSize="30" fontWeight="600"
+            fill="var(--ink)" fontFamily="inherit" letterSpacing="-1">$885</text>
+          <text x="149" y="148" textAnchor="middle" fontSize="9" fontWeight="600"
+            fill={ink} fontFamily="inherit" letterSpacing="2">SAFE TO SPEND</text>
+          {/* subtract line */}
+          <line x1="92" y1="98" x2="118" y2="98" stroke={stroke} strokeWidth={sw} strokeLinecap="round" />
+        </g>
+
+        {/* minus token */}
+        <circle cx="226" cy="70" r="17" fill={surface} stroke={stroke} strokeWidth={sw} />
+        <line x1="218" y1="70" x2="234" y2="70" stroke={stroke} strokeWidth={sw} strokeLinecap="round" />
       </svg>
     );
   }
 
   if (scene === "calendar") {
     return (
-      <svg viewBox="0 0 280 200" className="w-full max-w-[280px] mx-auto" aria-hidden>
-        <ellipse cx="140" cy="100" rx="120" ry="80" fill="var(--brand-soft)" opacity="0.5" />
-        <rect x="85" y="50" width="110" height="110" rx="18" fill="var(--surface)" stroke="var(--hairline)" strokeWidth="1.5" />
-        <rect x="85" y="50" width="110" height="28" rx="18" fill="var(--brand)" opacity="0.85" />
-        {[0, 1, 2, 3, 4, 5].map((i) => (
-          <circle
-            key={i}
-            cx={105 + (i % 3) * 28}
-            cy={95 + Math.floor(i / 3) * 28}
-            r="5"
-            fill={i === 2 ? "var(--brand)" : "var(--hairline)"}
-          />
-        ))}
+      <svg viewBox="0 0 280 220" width="100%" aria-hidden role="img">
+        <ellipse cx="140" cy="196" rx="74" ry="9" fill="rgba(0,0,0,0.18)" />
+
+        <rect x="78" y="50" width="124" height="132" rx="18" fill={surface} stroke="var(--hairline)" strokeWidth="1" />
+        {/* header */}
+        <path d="M78 68 a18 18 0 0 1 18 -18 h88 a18 18 0 0 1 18 18 v8 H78 Z" fill={soft} />
+        <rect x="78" y="68" width="124" height="8" fill={soft} />
+        <line x1="104" y1="44" x2="104" y2="58" stroke={stroke} strokeWidth={sw} strokeLinecap="round" />
+        <line x1="176" y1="44" x2="176" y2="58" stroke={stroke} strokeWidth={sw} strokeLinecap="round" />
+
+        {/* date dots grid */}
+        {Array.from({ length: 12 }).map((_, i) => {
+          const col = i % 4;
+          const row = Math.floor(i / 4);
+          const cx = 102 + col * 26;
+          const cy = 100 + row * 26;
+          const isPay = i === 9;
+          const isNow = i === 2;
+          return (
+            <g key={i}>
+              {isPay ? (
+                <circle cx={cx} cy={cy} r="9" fill={stroke} />
+              ) : isNow ? (
+                <circle cx={cx} cy={cy} r="9" fill="none" stroke={stroke} strokeWidth={sw} />
+              ) : (
+                <circle cx={cx} cy={cy} r="3.5" fill={ink} />
+              )}
+            </g>
+          );
+        })}
       </svg>
     );
   }
 
+  // shield
   return (
-    <svg viewBox="0 0 280 200" className="w-full max-w-[280px] mx-auto" aria-hidden>
-      <ellipse cx="140" cy="100" rx="120" ry="80" fill="var(--brand-soft)" opacity="0.5" />
+    <svg viewBox="0 0 280 220" width="100%" aria-hidden role="img">
+      <ellipse cx="140" cy="200" rx="66" ry="9" fill="rgba(0,0,0,0.18)" />
       <path
-        d="M140 45 L175 75 L165 120 L115 120 L105 75 Z"
-        fill="var(--surface)"
-        stroke="var(--brand)"
-        strokeWidth="2"
-        strokeLinejoin="round"
+        d="M140 40 L196 62 L188 138 C181 166 140 188 140 188 C140 188 99 166 92 138 L84 62 Z"
+        fill={surface} stroke={stroke} strokeWidth={sw} strokeLinejoin="round"
       />
       <path
-        d="M125 95 L138 108 L158 82"
-        fill="none"
-        stroke="var(--brand-deep)"
-        strokeWidth="3"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        d="M140 40 L196 62 L188 138 C181 166 140 188 140 188 C140 188 99 166 92 138 L84 62 Z"
+        fill={soft}
       />
-      <circle cx="200" cy="130" r="22" fill="var(--tight-bg)" stroke="var(--tight)" strokeWidth="1.5" />
-      <text x="200" y="136" textAnchor="middle" fontSize="18" fill="var(--tight)">
-        !
-      </text>
+      <path
+        d="M118 112 L134 128 L166 92"
+        fill="none" stroke={stroke} strokeWidth="3.5"
+        strokeLinecap="round" strokeLinejoin="round"
+      />
     </svg>
   );
 }

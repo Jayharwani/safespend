@@ -1,5 +1,6 @@
 import { useEffect } from "react";
-import { Check } from "lucide-react";
+import { Check } from "../lib/icons";
+import { motion } from "framer-motion";
 
 interface ToastProps {
   message: string;
@@ -8,22 +9,50 @@ interface ToastProps {
 
 export default function Toast({ message, onDone }: ToastProps) {
   useEffect(() => {
-    const t = setTimeout(onDone, 2500);
+    const t = setTimeout(onDone, 2400);
     return () => clearTimeout(t);
   }, [onDone]);
 
   return (
-    <div
-      className="fixed left-1/2 -translate-x-1/2 z-[60] animate-toast"
-      style={{ bottom: "calc(72px + env(safe-area-inset-bottom))" }}
+    <motion.div
+      initial={{ opacity: 0, y: 24, x: "-50%", scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, x: "-50%", scale: 1 }}
+      exit={{ opacity: 0, y: 12, x: "-50%", scale: 0.97 }}
+      transition={{ type: "spring", stiffness: 380, damping: 28 }}
+      style={{
+        position: "fixed",
+        left: "50%",
+        bottom: "calc(108px + env(safe-area-inset-bottom))",
+        zIndex: 60,
+      }}
       role="status"
     >
-      <div className="flex items-center gap-2.5 bg-surface text-primary text-[15px] pl-3 pr-4 py-3 rounded-[var(--r-button)] shadow-e2 border border-border-subtle">
-        <span className="w-7 h-7 rounded-full bg-brand-tint flex items-center justify-center shrink-0">
-          <Check className="w-4 h-4 text-brand" strokeWidth={2.5} />
+      <div
+        className="toast"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+        }}
+      >
+        <span
+          style={{
+            width: 28,
+            height: 28,
+            borderRadius: 999,
+            background: "var(--accent)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+            color: "var(--on-accent)",
+            boxShadow: "var(--shadow-sm)",
+          }}
+        >
+          <Check size={15} weight="bold" />
         </span>
         {message}
       </div>
-    </div>
+    </motion.div>
   );
 }

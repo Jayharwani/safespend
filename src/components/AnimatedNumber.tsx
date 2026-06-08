@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 
 interface AnimatedNumberProps {
   value: number;
   format: (n: number) => string;
   className?: string;
+  style?: CSSProperties;
   "aria-label"?: string;
 }
 
@@ -11,10 +12,11 @@ export default function AnimatedNumber({
   value,
   format,
   className = "",
+  style,
   "aria-label": ariaLabel,
 }: AnimatedNumberProps) {
-  const [display, setDisplay] = useState(0);
-  const fromRef = useRef(0);
+  const [display, setDisplay] = useState(value);
+  const fromRef = useRef(value);
   const mounted = useRef(false);
 
   useEffect(() => {
@@ -36,17 +38,19 @@ export default function AnimatedNumber({
     const start = performance.now();
     const ease = (t: number) => 1 - Math.pow(1 - t, 3);
 
+    let raf = 0;
     const tick = (now: number) => {
       const t = Math.min((now - start) / duration, 1);
       setDisplay(Math.round(from + (value - from) * ease(t)));
-      if (t < 1) requestAnimationFrame(tick);
+      if (t < 1) raf = requestAnimationFrame(tick);
     };
 
-    requestAnimationFrame(tick);
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
   }, [value]);
 
   return (
-    <p className={`money ${className}`} aria-label={ariaLabel}>
+    <p className={`money ${className}`} style={style} aria-label={ariaLabel}>
       {format(display)}
     </p>
   );

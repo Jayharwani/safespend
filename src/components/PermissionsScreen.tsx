@@ -1,4 +1,7 @@
-import { Bell } from "lucide-react";
+import { Bell } from "../lib/icons";
+import { motion } from "framer-motion";
+import { staggerContainer, staggerItem } from "../lib/motion";
+import AuroraBackground from "./AuroraBackground";
 
 interface PermissionsScreenProps {
   onAllow: () => void;
@@ -7,36 +10,86 @@ interface PermissionsScreenProps {
 
 export default function PermissionsScreen({ onAllow, onSkip }: PermissionsScreenProps) {
   return (
-    <div className="app-shell">
-      <div className="flex-1 flex flex-col items-center justify-center px-6 pb-8 text-center">
-        
-        {/* Content */}
-        <div className="rise my-auto" style={{ animationDelay: "0ms" }}>
-          <div className="w-20 h-20 rounded-3xl bg-brand-tint dark:bg-brand-soft flex items-center justify-center mx-auto mb-6 shadow-sm border border-border-subtle">
-            <Bell className="w-8 h-8 text-brand" strokeWidth={2} />
-          </div>
-          <h1 className="text-[26px] font-bold text-primary tracking-tight mb-3">
-            Get alert notifications
-          </h1>
-          <p className="text-[14px] text-secondary leading-relaxed max-w-[280px] mx-auto">
-            We will only ping you when an upcoming bill is predicted to push your balance low. No spam or marketing, guaranteed.
-          </p>
-        </div>
+    <>
+      <AuroraBackground />
+      <div className="app-shell">
+        <motion.div
+          variants={staggerContainer}
+          initial="initial"
+          animate="animate"
+          style={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "32px 24px",
+            textAlign: "center",
+          }}
+        >
+          <motion.div variants={staggerItem} style={{ marginBottom: "auto" }} />
 
-        {/* Buttons */}
-        <div className="w-full space-y-3 rise mt-auto" style={{ animationDelay: "140ms" }}>
-          <button type="button" onClick={onAllow} className="btn-primary">
-            Allow notifications
-          </button>
-          <button
-            type="button"
-            onClick={onSkip}
-            className="w-full text-brand hover:opacity-85 text-[15px] font-semibold min-h-[44px] cursor-pointer bg-transparent border-none"
+          <motion.div variants={staggerItem}>
+            <motion.div
+              animate={{ scale: [1, 1.06, 1] }}
+              transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
+              style={{
+                width: 92,
+                height: 92,
+                borderRadius: 26,
+                background: "var(--accent)",
+                color: "var(--on-accent)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                margin: "0 auto 28px",
+                boxShadow: "var(--shadow-sm), inset 0 1px 0 rgba(255,255,255,0.22)",
+              }}
+            >
+              <Bell size={40} weight="duotone" />
+            </motion.div>
+            <h1
+              style={{
+                fontSize: 26,
+                fontWeight: 600,
+                letterSpacing: "-0.03em",
+                marginBottom: 12,
+              }}
+            >
+              Get a heads-up before you dip
+            </h1>
+            <p
+              style={{
+                fontSize: 16,
+                color: "var(--ink-soft)",
+                lineHeight: 1.5,
+                maxWidth: 320,
+                margin: "0 auto",
+                fontWeight: 500,
+              }}
+            >
+              We'll only ping you when an upcoming bill would push your balance low. Nothing else.
+            </p>
+          </motion.div>
+
+          <motion.div
+            variants={staggerItem}
+            style={{
+              width: "100%",
+              display: "grid",
+              gap: 10,
+              marginTop: "auto",
+            }}
           >
-            Maybe later
-          </button>
-        </div>
+            <button type="button" onClick={onAllow} className="btn-primary">
+              Turn on alerts
+            </button>
+            <button type="button" onClick={onSkip} className="btn-text">
+              Maybe later
+            </button>
+          </motion.div>
+        </motion.div>
       </div>
-    </div>
+    </>
   );
 }

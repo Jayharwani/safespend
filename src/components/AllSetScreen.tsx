@@ -2,6 +2,8 @@ import { motion } from "framer-motion";
 import AnimatedNumber from "./AnimatedNumber";
 import { formatMoney } from "../lib/finance";
 import { easeOut } from "../lib/motion";
+import FloatingOrb from "./FloatingOrb";
+import AuroraBackground from "./AuroraBackground";
 
 interface AllSetScreenProps {
   safeToSpend: number;
@@ -9,54 +11,102 @@ interface AllSetScreenProps {
 }
 
 export default function AllSetScreen({ safeToSpend, onContinue }: AllSetScreenProps) {
+  const variant =
+    safeToSpend > 200 ? "safe" : safeToSpend > 0 ? "tight" : "over";
+
   return (
-    <div className="app-shell">
-      <div className="flex-1 flex flex-col items-center justify-center px-6 pb-8 text-center">
-        
-        {/* Animated Checkmark */}
-        <motion.svg
-          width="72"
-          height="72"
-          viewBox="0 0 72 72"
-          className="mb-6"
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.5, ease: easeOut }}
+    <>
+      <AuroraBackground />
+      <div className="app-shell">
+        <div
+          style={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "32px 24px",
+            textAlign: "center",
+          }}
         >
-          <circle cx="36" cy="36" r="34" fill="var(--brand-soft)" stroke="var(--brand)" strokeWidth="2.5" />
-          <motion.path
-            d="M24 37 L32 45 L48 27"
-            fill="none"
-            stroke="var(--brand-deep)"
-            strokeWidth="3.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ duration: 0.5, delay: 0.2, ease: easeOut }}
-          />
-        </motion.svg>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.85 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.7, ease: easeOut }}
+            style={{ marginBottom: 36 }}
+          >
+            <FloatingOrb size={140} variant={variant as "safe" | "tight" | "over"} />
+          </motion.div>
 
-        {/* Text */}
-        <h1 className="text-[30px] font-bold text-primary tracking-tight mb-2">You are all set</h1>
-        <p className="text-secondary text-[14px] mb-8 font-medium">Your current Safe to Spend total is:</p>
+          <motion.p
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+            style={{
+              fontSize: 12,
+              fontWeight: 600,
+              color: "var(--ink-faint)",
+              textTransform: "uppercase",
+              letterSpacing: "0.16em",
+              marginBottom: 8,
+            }}
+          >
+            You're all set
+          </motion.p>
 
-        {/* Big Number */}
-        <AnimatedNumber
-          value={safeToSpend}
-          format={formatMoney}
-          className="text-[64px] leading-none font-bold tracking-[-1.5px] text-safe mb-10"
-        />
+          <motion.h1
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35, duration: 0.5 }}
+            style={{
+              fontSize: 22,
+              fontWeight: 600,
+              letterSpacing: "-0.02em",
+              color: "var(--ink-soft)",
+              marginBottom: 14,
+            }}
+          >
+            Here's your safe-to-spend until payday
+          </motion.h1>
 
-        {/* Button */}
-        <button
-          type="button"
-          onClick={onContinue}
-          className="btn-primary w-full max-w-[320px] h-[52px]"
-        >
-          Go to Dashboard
-        </button>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.5, duration: 0.6, ease: easeOut }}
+            style={{ marginBottom: 48 }}
+          >
+            <AnimatedNumber
+              value={safeToSpend}
+              format={formatMoney}
+              className="num"
+              style={{
+                fontSize: 64,
+                fontWeight: 600,
+                lineHeight: 1,
+                letterSpacing: "-0.03em",
+                color:
+                  variant === "safe"
+                    ? "var(--accent)"
+                    : variant === "tight"
+                      ? "var(--tight)"
+                      : "var(--over)",
+              }}
+            />
+          </motion.div>
+
+          <motion.button
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7, duration: 0.5 }}
+            type="button"
+            onClick={onContinue}
+            className="btn-primary"
+            style={{ maxWidth: 320 }}
+          >
+            Go to Headroom
+          </motion.button>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

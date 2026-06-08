@@ -1,21 +1,88 @@
 import { motion } from "framer-motion";
 import { easeOut } from "../lib/motion";
+import FloatingOrb from "./FloatingOrb";
+import AuroraBackground from "./AuroraBackground";
 
 export default function SplashScreen() {
   return (
-    <div className="app-shell items-center justify-center min-h-dvh">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.92 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.6, ease: easeOut }}
-        className="text-center"
+    <>
+      <AuroraBackground />
+      <div
+        className="app-shell"
+        style={{
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "100dvh",
+        }}
       >
-        <div className="w-16 h-16 rounded-[20px] bg-brand-tint flex items-center justify-center mx-auto mb-4 shadow-e1">
-          <span className="text-brand text-[28px] font-semibold">H</span>
+        <div style={{ textAlign: "center" }}>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.7 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1.4, ease: easeOut }}
+            style={{ display: "flex", justifyContent: "center", marginBottom: 36 }}
+          >
+            <FloatingOrb size={132} variant="brand" />
+          </motion.div>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.7, ease: easeOut }}
+            className="wordmark"
+            style={{
+              fontSize: 40,
+              fontWeight: 600,
+              letterSpacing: "-0.045em",
+              marginBottom: 10,
+            }}
+          >
+            Headroom
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, delay: 1.1, ease: easeOut }}
+            style={{
+              fontSize: 14,
+              color: "var(--ink-soft)",
+              fontWeight: 500,
+              letterSpacing: "0.01em",
+            }}
+          >
+            What you can actually spend.
+          </motion.p>
+
+          {/* Subtle loading hint */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 1.6 }}
+            style={{
+              width: 36,
+              height: 4,
+              borderRadius: 999,
+              background: "var(--hairline-strong)",
+              margin: "32px auto 0",
+              overflow: "hidden",
+              position: "relative",
+            }}
+          >
+            <motion.div
+              initial={{ x: "-100%" }}
+              animate={{ x: "120%" }}
+              transition={{ duration: 1.4, delay: 1.6, ease: easeOut }}
+              style={{
+                position: "absolute",
+                inset: 0,
+                background: "var(--accent)",
+                borderRadius: 999,
+              }}
+            />
+          </motion.div>
         </div>
-        <h1 className="text-[30px] font-semibold tracking-[-0.5px] text-primary">Headroom</h1>
-        <p className="text-[13px] text-secondary mt-1">Know what you can spend</p>
-      </motion.div>
-    </div>
+      </div>
+    </>
   );
 }

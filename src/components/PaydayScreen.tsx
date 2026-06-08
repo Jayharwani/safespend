@@ -3,7 +3,8 @@ import confetti from "canvas-confetti";
 import { motion } from "framer-motion";
 import AnimatedNumber from "./AnimatedNumber";
 import { formatMoney } from "../lib/finance";
-import { prefersReducedMotion } from "../lib/motion";
+import { prefersReducedMotion, springSoft } from "../lib/motion";
+import FloatingOrb from "./FloatingOrb";
 
 interface PaydayScreenProps {
   safeToSpend: number;
@@ -13,45 +14,86 @@ interface PaydayScreenProps {
 export default function PaydayScreen({ safeToSpend, onDismiss }: PaydayScreenProps) {
   useEffect(() => {
     if (prefersReducedMotion()) return;
-    confetti({
-      particleCount: 80,
-      spread: 70,
-      startVelocity: 30,
-      scalar: 0.95,
-      ticks: 180,
-      origin: { y: 0.4 },
-      colors: ["#00f29f", "#00bc7b", "#eef3f8", "#ffaa00"],
-    });
+    const fire = (origin: { x?: number; y: number }) =>
+      confetti({
+        particleCount: 60,
+        spread: 80,
+        startVelocity: 32,
+        scalar: 0.95,
+        ticks: 200,
+        origin,
+        colors: ["#35C28D", "#1F8E63", "#D9A441", "#5FD9AC", "#F4F6F4"],
+      });
+    fire({ x: 0.2, y: 0.4 });
+    setTimeout(() => fire({ x: 0.8, y: 0.4 }), 180);
+    setTimeout(() => fire({ x: 0.5, y: 0.35 }), 360);
   }, []);
 
   return (
     <motion.div
-      className="fixed inset-0 z-[70] flex items-center justify-center px-6"
-      style={{ background: "rgba(14, 18, 16, 0.45)", backdropFilter: "blur(6px)" }}
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 70,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 24,
+        background: "rgba(7, 7, 13, 0.78)",
+        backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
+      }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
       <motion.div
-        className="w-full max-w-[360px] hero-panel text-center py-10 px-6 border border-border-subtle"
-        initial={{ scale: 0.92, y: 15 }}
+        className="hero"
+        style={{
+          width: "100%",
+          maxWidth: 380,
+          textAlign: "center",
+          padding: "36px 28px 32px",
+        }}
+        initial={{ scale: 0.88, y: 16 }}
         animate={{ scale: 1, y: 0 }}
-        transition={{ type: "spring", stiffness: 280, damping: 28 }}
+        transition={springSoft}
       >
-        <h1 className="text-[32px] font-bold tracking-tight text-primary mb-2">Payday!</h1>
-        <p className="text-[14px] text-secondary font-medium">Your new Safe to Spend total is:</p>
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
+          <FloatingOrb size={110} variant="brand" />
+        </div>
+
+        <h1
+          style={{
+            fontSize: 32,
+            fontWeight: 600,
+            letterSpacing: "-0.03em",
+            marginBottom: 6,
+            color: "var(--ink)",
+          }}
+        >
+          Payday.
+        </h1>
+        <p style={{ fontSize: 14, color: "var(--ink-soft)", marginBottom: 22 }}>
+          New cycle — here's your room.
+        </p>
+
         <AnimatedNumber
           value={safeToSpend}
           format={formatMoney}
-          className="text-[56px] leading-none font-bold tracking-[-1.5px] text-safe my-4"
+          className="num"
+          style={{
+            fontSize: 56,
+            fontWeight: 600,
+            lineHeight: 1,
+            letterSpacing: "-0.03em",
+            color: "var(--accent)",
+            marginBottom: 32,
+          }}
         />
-        <p className="text-[13px] text-secondary mb-8">All reset for your next paycheck cycle.</p>
-        <button
-          type="button"
-          onClick={onDismiss}
-          className="btn-primary w-full h-[52px]"
-        >
-          Got it
+
+        <button type="button" onClick={onDismiss} className="btn-primary">
+          Nice
         </button>
       </motion.div>
     </motion.div>

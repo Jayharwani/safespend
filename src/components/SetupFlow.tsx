@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { format, addDays } from "date-fns";
-import { ChevronLeft, ChevronRight, Plus, Trash2, Wallet, Calendar, Receipt } from "lucide-react";
+import { CaretLeft, Plus, Trash, Wallet, CalendarBlank, Receipt } from "../lib/icons";
 import { motion, AnimatePresence } from "framer-motion";
 import type { AppData, Bill, PayFrequency } from "../types";
 import { generateId } from "../lib/storage";
+import { formatMoney } from "../lib/finance";
+import { easeOut } from "../lib/motion";
+import AuroraBackground from "./AuroraBackground";
 
 interface SetupFlowProps {
   onComplete: (data: Partial<AppData>) => void;
@@ -13,6 +16,12 @@ const FREQUENCIES: { value: PayFrequency; label: string }[] = [
   { value: "weekly", label: "Weekly" },
   { value: "fortnightly", label: "Fortnightly" },
   { value: "monthly", label: "Monthly" },
+];
+
+const STEPS = [
+  { icon: Wallet, eyebrow: "Your money", title: "What's in your account?", sub: "A rough number is fine — edit it anytime." },
+  { icon: CalendarBlank, eyebrow: "Your income", title: "When do you get paid?", sub: "We use this to mark the end of each cycle." },
+  { icon: Receipt, eyebrow: "Your bills", title: "What's coming up?", sub: "Add the big regulars — rent, phone, car." },
 ];
 
 export default function SetupFlow({ onComplete }: SetupFlowProps) {
@@ -26,12 +35,6 @@ export default function SetupFlow({ onComplete }: SetupFlowProps) {
   const [bills, setBills] = useState<Bill[]>([
     { id: generateId(), name: "", amount: 0, dayOfMonth: 1 },
   ]);
-
-  const steps = [
-    { icon: Wallet, title: "Account balance", subtitle: "What is in your bank account right now?" },
-    { icon: Calendar, title: "Your paycheck", subtitle: "When and how much is your income?" },
-    { icon: Receipt, title: "Recurring bills", subtitle: "What are your fixed upcoming expenses?" },
-  ];
 
   const canProceed = () => {
     if (step === 0) return balance !== "" && Number(balance) >= 0;
@@ -52,281 +55,451 @@ export default function SetupFlow({ onComplete }: SetupFlowProps) {
     });
   };
 
-  const addBill = () => {
+  const addBill = () =>
     setBills([...bills, { id: generateId(), name: "", amount: 0, dayOfMonth: 1 }]);
-  };
-
-  const updateBill = (id: string, patch: Partial<Bill>) => {
+  const updateBill = (id: string, patch: Partial<Bill>) =>
     setBills(bills.map((b) => (b.id === id ? { ...b, ...patch } : b)));
-  };
+  const removeBill = (id: string) =>
+    bills.length > 1 && setBills(bills.filter((b) => b.id !== id));
 
-  const removeBill = (id: string) => {
-    if (bills.length > 1) setBills(bills.filter((b) => b.id !== id));
-  };
-
-  const StepIcon = steps[step].icon;
+  const StepIcon = STEPS[step].icon;
+  const validBillCount = bills.filter((b) => b.name.trim() && b.amount > 0).length;
 
   return (
-    <div className="app-shell">
-      <div className="flex-1 flex flex-col px-6 pt-8 pb-8">
-        
-        {/* Navigation / Progress header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
+    <>
+      <AuroraBackground />
+      <div className="app-shell">
+        <div
+          style={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            padding: "16px 24px 28px",
+          }}
+        >
+          {/* Top bar */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: 20,
+            }}
+          >
             {step > 0 ? (
               <button
                 type="button"
                 onClick={() => setStep(step - 1)}
-                className="flex items-center gap-1 text-secondary text-[14px] font-semibold cursor-pointer py-1.5"
+                className="icon-btn"
+                aria-label="Back"
+                style={{ width: 40, height: 40 }}
               >
-                <ChevronLeft className="w-4 h-4" />
-                Back
+                <CaretLeft size={18} weight="bold" />
               </button>
             ) : (
-              <div className="w-10 h-1.5" />
+              <span style={{ width: 40 }} />
             )}
-            <span className="text-[12px] font-bold uppercase tracking-wider text-secondary">
-              Step {step + 1} of 3
+            <div className="steps" style={{ flex: 1, margin: "0 16px" }}>
+              {[0, 1, 2].map((i) => (
+                <span key={i} className={i <= step ? "done" : ""} />
+              ))}
+            </div>
+            <span
+              style={{
+                fontSize: 13,
+                color: "var(--ink-soft)",
+                fontWeight: 700,
+                minWidth: 40,
+                textAlign: "right",
+              }}
+            >
+              {step + 1}/3
             </span>
           </div>
 
-          <div className="flex gap-1.5 mb-6">
-            {[0, 1, 2].map((i) => (
-              <div
-                key={i}
-                className="h-1 flex-1 rounded-full relative bg-border-subtle overflow-hidden"
-              >
-                <motion.div
-                  className="absolute inset-y-0 left-0 bg-brand rounded-full"
-                  initial={{ width: "0%" }}
-                  animate={{ width: i <= step ? "100%" : "0%" }}
-                  transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                />
-              </div>
-            ))}
-          </div>
-
-          {/* Heading */}
-          <div className="flex items-start gap-3.5 mt-2">
-            <div className="w-11 h-11 rounded-2xl bg-brand-tint dark:bg-brand-soft flex items-center justify-center shrink-0">
-              <StepIcon className="w-5 h-5 text-brand" strokeWidth={2} />
-            </div>
-            <div>
-              <h1 className="text-[22px] font-bold text-primary leading-snug">{steps[step].title}</h1>
-              <p className="text-secondary text-[14px] mt-0.5">{steps[step].subtitle}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Content Box with transition */}
-        <div className="flex-1">
           <AnimatePresence mode="wait">
             <motion.div
               key={step}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-              className="h-full"
+              initial={{ opacity: 0, x: 24 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -16 }}
+              transition={{ duration: 0.42, ease: easeOut }}
+              style={{ flex: 1, display: "flex", flexDirection: "column" }}
             >
-              {step === 0 && (
-                <div className="space-y-6 pt-4 text-center">
-                  <div className="space-y-2">
-                    <span className="text-[13px] font-bold uppercase tracking-wider text-secondary">
-                      Current balance
+              {/* Contextual icon badge */}
+              <div
+                style={{
+                  width: 60,
+                  height: 60,
+                  borderRadius: 18,
+                  background: "var(--surface)",
+                  border: "1px solid var(--hairline)",
+                  boxShadow: "var(--shadow-sm), var(--edge-light)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "var(--accent)",
+                  marginBottom: 20,
+                }}
+              >
+                <StepIcon size={28} weight="duotone" />
+              </div>
+
+              {/* Heading */}
+              <p
+                style={{
+                  fontSize: 12,
+                  fontWeight: 700,
+                  color: "var(--accent)",
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  marginBottom: 8,
+                }}
+              >
+                {STEPS[step].eyebrow}
+              </p>
+              <h1
+                style={{
+                  fontSize: 28,
+                  fontWeight: 600,
+                  letterSpacing: "-0.03em",
+                  lineHeight: 1.15,
+                }}
+              >
+                {STEPS[step].title}
+              </h1>
+              <p style={{ fontSize: 15, color: "var(--ink-soft)", marginTop: 10, fontWeight: 500 }}>
+                {STEPS[step].sub}
+              </p>
+
+              {/* Body */}
+              <div style={{ flex: 1, marginTop: 28 }}>
+                {step === 0 && (
+                  <div
+                    className="card"
+                    style={{
+                      padding: "36px 24px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: 4,
+                      background: "var(--surface-2)",
+                    }}
+                  >
+                    <span
+                      className="wordmark"
+                      style={{ fontSize: 44, fontWeight: 600 }}
+                    >
+                      $
                     </span>
-                    <div className="relative flex items-center justify-center">
-                      <span className="text-secondary text-[36px] font-medium mr-1 select-none">$</span>
-                      <input
-                        type="number"
-                        inputMode="decimal"
-                        placeholder="0.00"
-                        value={balance}
-                        onChange={(e) => setBalance(e.target.value)}
-                        className="money bg-transparent border-none text-[56px] font-bold text-primary focus:outline-none text-center w-full max-w-[280px]"
-                        autoFocus
-                      />
-                    </div>
-                  </div>
-                  <p className="text-[13px] text-secondary leading-relaxed max-w-[300px] mx-auto">
-                    Enter the current total amount showing in your bank account. We'll adjust it automatically as upcoming bills approach.
-                  </p>
-                </div>
-              )}
-
-              {step === 1 && (
-                <div className="space-y-5 pt-2">
-                  <div className="space-y-1.5">
-                    <label className="text-[13px] font-bold uppercase tracking-wider text-secondary block pl-1">
-                      Paycheck amount
-                    </label>
-                    <div className="relative">
-                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-secondary font-medium">$</span>
-                      <input
-                        type="number"
-                        inputMode="decimal"
-                        placeholder="2,400"
-                        value={payAmount}
-                        onChange={(e) => setPayAmount(e.target.value)}
-                        className="form-input money w-full h-[52px] !pl-9 text-[18px] font-bold"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-[13px] font-bold uppercase tracking-wider text-secondary block pl-1">
-                      Next payday
-                    </label>
                     <input
-                      type="date"
-                      value={nextPayday}
-                      onChange={(e) => setNextPayday(e.target.value)}
-                      className="form-input w-full h-[52px]"
+                      type="number"
+                      inputMode="decimal"
+                      placeholder="0"
+                      value={balance}
+                      onChange={(e) => setBalance(e.target.value)}
+                      className="amount-input money"
+                      style={{ fontSize: 60, maxWidth: 260 }}
+                      autoFocus
                     />
                   </div>
+                )}
 
-                  <div className="space-y-2.5">
-                    <label className="text-[13px] font-bold uppercase tracking-wider text-secondary block pl-1">
-                      Pay Frequency
-                    </label>
-                    <div className="flex gap-1 p-1 bg-canvas border border-border-subtle rounded-full relative">
-                      {FREQUENCIES.map((f) => {
-                        const isFreqActive = payFrequency === f.value;
-                        return (
+                {step === 1 && (
+                  <div style={{ display: "grid", gap: 18 }}>
+                    <div className="field">
+                      <label>Paycheck amount</label>
+                      <div style={{ position: "relative" }}>
+                        <span
+                          style={{
+                            position: "absolute",
+                            left: 18,
+                            top: "50%",
+                            transform: "translateY(-50%)",
+                            color: "var(--ink-soft)",
+                            fontWeight: 600,
+                          }}
+                        >
+                          $
+                        </span>
+                        <input
+                          type="number"
+                          inputMode="decimal"
+                          placeholder="2,400"
+                          value={payAmount}
+                          onChange={(e) => setPayAmount(e.target.value)}
+                          className="money"
+                          style={{ paddingLeft: 32, fontWeight: 600 }}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="field">
+                      <label>Next payday</label>
+                      <div style={{ position: "relative" }}>
+                        <div
+                          className="input"
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          <span style={{ color: "var(--ink)" }}>
+                            {format(new Date(nextPayday + "T00:00:00"), "EEE, MMM d, yyyy")}
+                          </span>
+                          <CalendarBlank size={18} weight="regular" color="var(--ink-faint)" />
+                        </div>
+                        <input
+                          type="date"
+                          value={nextPayday}
+                          onChange={(e) => setNextPayday(e.target.value)}
+                          aria-label="Next payday"
+                          style={{
+                            position: "absolute",
+                            inset: 0,
+                            width: "100%",
+                            height: "100%",
+                            opacity: 0,
+                            border: "none",
+                            background: "transparent",
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="field">
+                      <label>How often</label>
+                      <div className="segmented">
+                        {FREQUENCIES.map((f) => (
                           <button
                             key={f.value}
                             type="button"
+                            aria-selected={payFrequency === f.value}
                             onClick={() => setPayFrequency(f.value)}
-                            className="relative flex-1 h-[42px] rounded-full text-[14px] font-semibold z-10 cursor-pointer outline-none"
-                            style={{ color: isFreqActive ? "var(--brand)" : "var(--ink-soft)" }}
+                            style={{ position: "relative" }}
                           >
-                            {isFreqActive && (
-                              <motion.div
-                                layoutId="freqActiveIndicator"
-                                className="absolute inset-0 bg-surface shadow-sm rounded-full -z-10 border border-border-subtle"
-                                transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                            {payFrequency === f.value && (
+                              <motion.span
+                                layoutId="freq-pill"
+                                style={{
+                                  position: "absolute",
+                                  inset: 0,
+                                  borderRadius: 10,
+                                  background: "var(--surface-2)",
+                                  boxShadow: "var(--shadow-sm), var(--edge-light)",
+                                  zIndex: -1,
+                                }}
+                                transition={{ type: "spring", stiffness: 420, damping: 36 }}
                               />
                             )}
                             {f.label}
                           </button>
-                        );
-                      })}
+                        ))}
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {step === 2 && (
-                <div className="space-y-4 pt-1 max-h-[50dvh] overflow-y-auto pr-1">
-                  {bills.map((bill, idx) => (
-                    <div
-                      key={bill.id}
-                      className="bg-surface border border-border-subtle rounded-2xl p-4 space-y-3 shadow-sm relative"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-[12px] font-bold uppercase tracking-wider text-secondary">
-                          Bill #{idx + 1}
-                        </span>
-                        {bills.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => removeBill(bill.id)}
-                            className="text-secondary hover:text-over min-w-[36px] min-h-[36px] flex items-center justify-center cursor-pointer transition-colors"
-                            aria-label="Remove bill"
+                {step === 2 && (
+                  <div style={{ display: "grid", gap: 12 }}>
+                    {bills.map((bill, idx) => (
+                      <motion.div
+                        key={bill.id}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="card"
+                        style={{ padding: 16, display: "grid", gap: 12 }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontSize: 12,
+                              color: "var(--ink-faint)",
+                              fontWeight: 700,
+                              letterSpacing: "0.06em",
+                              textTransform: "uppercase",
+                            }}
                           >
-                            <Trash2 className="w-4 h-4" strokeWidth={2} />
-                          </button>
-                        )}
-                      </div>
-                      <input
-                        type="text"
-                        placeholder="E.g. Rent, Internet, Spotify"
-                        value={bill.name}
-                        onChange={(e) => updateBill(bill.id, { name: e.target.value })}
-                        className="form-input w-full h-[48px]"
-                      />
-                      <div className="flex gap-3">
-                        <div className="relative flex-1">
-                          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-secondary font-medium">
-                            $
+                            Bill {idx + 1}
                           </span>
-                          <input
-                            type="number"
-                            inputMode="decimal"
-                            placeholder="Amount"
-                            value={bill.amount || ""}
-                            onChange={(e) =>
-                              updateBill(bill.id, { amount: Number(e.target.value) || 0 })
-                            }
-                            className="form-input money w-full h-[48px] !pl-8"
-                          />
+                          {bills.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => removeBill(bill.id)}
+                              aria-label="Remove bill"
+                              style={{
+                                background: "none",
+                                border: "none",
+                                color: "var(--over)",
+                                padding: 4,
+                                display: "flex",
+                              }}
+                            >
+                              <Trash size={17} weight="regular" />
+                            </button>
+                          )}
                         </div>
-                        <div className="flex items-center gap-2 bg-canvas border border-border-subtle rounded-2xl px-3.5 h-[48px] min-w-[110px]">
-                          <span className="text-secondary text-[12px] font-semibold uppercase">Day</span>
-                          <input
-                            type="number"
-                            inputMode="numeric"
-                            min={1}
-                            max={31}
-                            value={bill.dayOfMonth}
-                            onChange={(e) =>
-                              updateBill(bill.id, {
-                                dayOfMonth: Math.min(31, Math.max(1, Number(e.target.value) || 1)),
-                              })
-                            }
-                            className="money w-8 bg-transparent text-[16px] font-bold text-center focus:outline-none"
-                          />
+                        <input
+                          type="text"
+                          placeholder="e.g. Rent, Internet"
+                          value={bill.name}
+                          onChange={(e) => updateBill(bill.id, { name: e.target.value })}
+                          className="input"
+                          style={{ height: 50 }}
+                        />
+                        <div style={{ display: "flex", gap: 10 }}>
+                          <div style={{ position: "relative", flex: 1 }}>
+                            <span
+                              style={{
+                                position: "absolute",
+                                left: 14,
+                                top: "50%",
+                                transform: "translateY(-50%)",
+                                color: "var(--ink-soft)",
+                                fontWeight: 600,
+                              }}
+                            >
+                              $
+                            </span>
+                            <input
+                              type="number"
+                              inputMode="decimal"
+                              placeholder="Amount"
+                              value={bill.amount || ""}
+                              onChange={(e) =>
+                                updateBill(bill.id, { amount: Number(e.target.value) || 0 })
+                              }
+                              className="input money"
+                              style={{ paddingLeft: 28, height: 50 }}
+                            />
+                          </div>
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 8,
+                              padding: "0 14px",
+                              background: "var(--surface)",
+                              border: "1px solid var(--hairline)",
+                              borderRadius: "var(--r-input)",
+                              height: 50,
+                              minWidth: 104,
+                            }}
+                          >
+                            <span
+                              style={{
+                                fontSize: 11,
+                                color: "var(--ink-faint)",
+                                fontWeight: 700,
+                                letterSpacing: "0.06em",
+                                textTransform: "uppercase",
+                              }}
+                            >
+                              Day
+                            </span>
+                            <input
+                              type="number"
+                              inputMode="numeric"
+                              min={1}
+                              max={31}
+                              value={bill.dayOfMonth}
+                              onChange={(e) =>
+                                updateBill(bill.id, {
+                                  dayOfMonth: Math.min(31, Math.max(1, Number(e.target.value) || 1)),
+                                })
+                              }
+                              className="money"
+                              style={{
+                                width: 36,
+                                background: "transparent",
+                                border: "none",
+                                outline: "none",
+                                fontSize: 16,
+                                fontWeight: 700,
+                                color: "var(--ink)",
+                                textAlign: "center",
+                              }}
+                            />
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  ))}
+                      </motion.div>
+                    ))}
 
-                  <button
-                    type="button"
-                    onClick={addBill}
-                    className="w-full flex items-center justify-center gap-2 h-[50px] rounded-2xl border-2 border-dashed border-border-strong text-secondary hover:text-primary hover:border-brand text-[14px] font-semibold transition-all cursor-pointer"
-                  >
-                    <Plus className="w-4 h-4" strokeWidth={2.5} />
-                    Add another expense
-                  </button>
-
-                  <p className="text-[12px] text-secondary leading-relaxed pt-1 text-center">
-                    No bills yet? You can skip this and add them later in settings.
-                  </p>
-                </div>
-              )}
+                    <button
+                      type="button"
+                      onClick={addBill}
+                      style={{
+                        width: "100%",
+                        height: 50,
+                        border: "1.5px dashed var(--hairline-strong)",
+                        borderRadius: "var(--r-input)",
+                        background: "transparent",
+                        color: "var(--accent)",
+                        fontSize: 15,
+                        fontWeight: 600,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 6,
+                      }}
+                    >
+                      <Plus size={18} weight="bold" />
+                      Add another bill
+                    </button>
+                  </div>
+                )}
+              </div>
             </motion.div>
           </AnimatePresence>
-        </div>
 
-        {/* Action Button footer */}
-        <div className="mt-8 space-y-3">
-          {step < 2 ? (
+          {/* Footer */}
+          <div style={{ marginTop: 20 }}>
+            {step === 2 && validBillCount > 0 && (
+              <p
+                style={{
+                  textAlign: "center",
+                  fontSize: 13,
+                  color: "var(--ink-soft)",
+                  marginBottom: 12,
+                  fontWeight: 500,
+                }}
+              >
+                {validBillCount} bill{validBillCount !== 1 ? "s" : ""} ·{" "}
+                <span className="money" style={{ color: "var(--ink)", fontWeight: 700 }}>
+                  {formatMoney(bills.reduce((s, b) => s + (b.amount || 0), 0))}
+                </span>{" "}
+                a month
+              </p>
+            )}
             <button
               type="button"
               disabled={!canProceed()}
-              onClick={() => setStep(step + 1)}
+              onClick={() => (step < 2 ? setStep(step + 1) : handleFinish())}
               className="btn-primary"
             >
-              Continue
-              <ChevronRight className="w-5 h-5" strokeWidth={2.25} />
+              {step < 2 ? "Continue" : "See my number"}
             </button>
-          ) : (
-            <button
-              type="button"
-              onClick={handleFinish}
-              className="btn-primary"
+            <p
+              style={{
+                textAlign: "center",
+                color: "var(--ink-faint)",
+                fontSize: 12,
+                marginTop: 14,
+                fontWeight: 500,
+              }}
             >
-              See my Safe Spend
-              <ChevronRight className="w-5 h-5" strokeWidth={2.25} />
-            </button>
-          )}
-
-          <p className="text-center text-secondary text-[12px] font-medium">
-            All data is stored locally on your device
-          </p>
+              All data stays on your device.
+            </p>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

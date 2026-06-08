@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
-import { X } from "lucide-react";
+import { X, CalendarBlank } from "../lib/icons";
 import type { EntryType } from "../types";
 import { springSoft } from "../lib/motion";
 
@@ -19,10 +19,10 @@ interface EntrySheetProps {
   initial?: Partial<SheetEntry>;
 }
 
-const TYPES: { value: EntryType; label: string; description: string }[] = [
-  { value: "spend", label: "Spend", description: "Something you bought today" },
-  { value: "bill", label: "Bill", description: "A payment coming soon" },
-  { value: "income", label: "Income", description: "Bonus, refund, side gig" },
+const TYPES: { value: EntryType; label: string; hint: string }[] = [
+  { value: "spend", label: "Spend", hint: "Something you bought today" },
+  { value: "bill", label: "Bill", hint: "A payment coming soon" },
+  { value: "income", label: "Income", hint: "Bonus, refund, side gig" },
 ];
 
 export default function EntrySheet({ open, onClose, onSubmit, initial }: EntrySheetProps) {
@@ -69,26 +69,35 @@ export default function EntrySheet({ open, onClose, onSubmit, initial }: EntrySh
   return (
     <AnimatePresence>
       {open && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center">
-          {/* Backdrop */}
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 50,
+            display: "flex",
+            alignItems: "flex-end",
+            justifyContent: "center",
+          }}
+        >
           <motion.div
-            className="absolute inset-0 bg-[#0e1210]/40 dark:bg-[#000000]/60 backdrop-blur-[6px]"
+            className="sheet-backdrop"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
             aria-hidden
           />
-          
-          {/* Sheet Drawer */}
+
           <motion.div
             role="dialog"
             aria-modal
             aria-labelledby="sheet-title"
-            className="relative w-full max-w-[430px] bg-surface rounded-t-[32px] px-6 pt-3 border-t border-border-subtle"
+            className="sheet"
             style={{
-              boxShadow: "var(--shadow-lg)",
-              paddingBottom: "max(2rem, env(safe-area-inset-bottom) + 12px)",
+              position: "relative",
+              width: "100%",
+              maxWidth: 430,
+              paddingBottom: "max(2rem, env(safe-area-inset-bottom) + 16px)",
             }}
             drag="y"
             dragConstraints={{ top: 0 }}
@@ -99,112 +108,163 @@ export default function EntrySheet({ open, onClose, onSubmit, initial }: EntrySh
             exit={{ y: "100%" }}
             transition={springSoft}
           >
-            {/* Grab handle */}
-            <div
-              className="w-10 h-1.5 rounded-full mx-auto mb-4 cursor-grab bg-border-subtle"
-            />
+            <div className="grab" />
 
-            {/* Header */}
-            <div className="flex items-center justify-between mb-5">
-              <h2 id="sheet-title" className="text-[22px] font-bold text-primary">
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginBottom: 22,
+              }}
+            >
+              <h2
+                id="sheet-title"
+                style={{ fontSize: 22, fontWeight: 600, letterSpacing: "-0.02em" }}
+              >
                 {titles[type]}
               </h2>
               <button
                 type="button"
                 onClick={onClose}
-                className="w-9 h-9 rounded-full bg-canvas border border-border-subtle flex items-center justify-center text-secondary hover:text-primary transition-colors cursor-pointer"
-                aria-label="Close modal"
+                className="icon-btn"
+                aria-label="Close"
+                style={{ width: 36, height: 36 }}
               >
-                <X className="w-4 h-4" strokeWidth={2.5} />
+                <X size={16} weight="bold" />
               </button>
             </div>
 
-            {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-5">
-              
-              {/* Sliding Entry Type Selector */}
-              <div className="space-y-2">
-                <div className="flex gap-1 p-1 bg-canvas border border-border-subtle rounded-full relative">
-                  {TYPES.map((t) => {
-                    const isTypeActive = type === t.value;
-                    return (
-                      <button
-                        key={t.value}
-                        type="button"
-                        onClick={() => setType(t.value)}
-                        className="relative flex-1 h-[38px] rounded-full text-[13px] font-bold z-10 cursor-pointer outline-none"
-                        style={{ color: isTypeActive ? "var(--brand)" : "var(--ink-soft)" }}
-                      >
-                        {isTypeActive && (
-                          <motion.div
-                            layoutId="sheetTypeActiveIndicator"
-                            className="absolute inset-0 bg-surface shadow-sm rounded-full -z-10 border border-border-subtle"
-                            transition={{ type: "spring", stiffness: 350, damping: 30 }}
-                          />
-                        )}
-                        {t.label}
-                      </button>
-                    );
-                  })}
+            <form onSubmit={handleSubmit} style={{ display: "grid", gap: 18 }}>
+              <div>
+                <div className="segmented" role="tablist" aria-label="Entry type">
+                  {TYPES.map((t) => (
+                    <button
+                      key={t.value}
+                      type="button"
+                      role="tab"
+                      aria-selected={type === t.value}
+                      onClick={() => setType(t.value)}
+                      style={{ position: "relative" }}
+                    >
+                      {type === t.value && (
+                        <motion.span
+                          layoutId="sheet-type-pill"
+                          style={{
+                            position: "absolute",
+                            inset: 0,
+                            borderRadius: 10,
+                            background: "var(--surface-2)",
+                            boxShadow: "var(--shadow-sm), var(--edge-light)",
+                            zIndex: -1,
+                          }}
+                          transition={{ type: "spring", stiffness: 420, damping: 36 }}
+                        />
+                      )}
+                      {t.label}
+                    </button>
+                  ))}
                 </div>
-                <p className="text-secondary text-[12px] pl-1.5 font-medium">
-                  {TYPES.find((t) => t.value === type)?.description}
+                <p
+                  style={{
+                    fontSize: 12,
+                    color: "var(--ink-faint)",
+                    marginTop: 10,
+                    paddingLeft: 6,
+                    fontWeight: 500,
+                  }}
+                >
+                  {TYPES.find((t) => t.value === type)?.hint}
                 </p>
               </div>
 
-              {/* Inputs */}
-              <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <label className="text-[12px] font-bold uppercase tracking-wider text-secondary pl-1 block">
-                    Description
-                  </label>
-                  <input
-                    type="text"
-                    placeholder={
-                      type === "spend" ? "E.g. New shoes, Grocery" : type === "bill" ? "E.g. Rent, Internet" : "E.g. Salary, Refund"
-                    }
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="form-input w-full h-[50px]"
-                    autoFocus
-                  />
-                </div>
+              <div className="field">
+                <label htmlFor="entry-name">Name</label>
+                <input
+                  id="entry-name"
+                  type="text"
+                  placeholder={
+                    type === "spend"
+                      ? "Groceries, coffee…"
+                      : type === "bill"
+                        ? "Rent, internet…"
+                        : "Refund, side gig…"
+                  }
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  autoFocus
+                />
+              </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-[12px] font-bold uppercase tracking-wider text-secondary pl-1 block">
-                    Amount
-                  </label>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-secondary font-medium">$</span>
-                    <input
-                      type="number"
-                      inputMode="decimal"
-                      placeholder="0.00"
-                      value={amount}
-                      onChange={(e) => setAmount(e.target.value)}
-                      className="form-input money w-full h-[50px] !pl-8 text-[18px] font-bold"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-[12px] font-bold uppercase tracking-wider text-secondary pl-1 block">
-                    Date
-                  </label>
+              <div className="field">
+                <label htmlFor="entry-amount">Amount</label>
+                <div style={{ position: "relative" }}>
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: 18,
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      color: "var(--ink-soft)",
+                      fontWeight: 600,
+                      fontSize: 17,
+                    }}
+                  >
+                    $
+                  </span>
                   <input
-                    type="date"
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
-                    className="form-input w-full h-[50px]"
+                    id="entry-amount"
+                    type="number"
+                    inputMode="decimal"
+                    placeholder="0.00"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    className="money"
+                    style={{ paddingLeft: 30, fontSize: 18, fontWeight: 700 }}
                   />
                 </div>
               </div>
 
-              {/* Submit Button */}
+              <div className="field">
+                <label htmlFor="entry-date">Date</label>
+                <div style={{ position: "relative" }}>
+                  <div
+                    className="input"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <span style={{ color: "var(--ink)" }}>
+                      {format(new Date(date + "T00:00:00"), "EEE, MMM d, yyyy")}
+                    </span>
+                    <CalendarBlank size={18} weight="regular" color="var(--ink-faint)" />
+                  </div>
+                  <input
+                    id="entry-date"
+                    type="date"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    aria-label="Date"
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      width: "100%",
+                      height: "100%",
+                      opacity: 0,
+                      border: "none",
+                      background: "transparent",
+                    }}
+                  />
+                </div>
+              </div>
+
               <button
                 type="submit"
                 disabled={!name.trim() || !amount || Number(amount) <= 0}
-                className="btn-primary w-full h-[52px] mt-4 disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none"
+                className="btn-primary"
+                style={{ marginTop: 6 }}
               >
                 {type === "spend" ? "Log spend" : type === "bill" ? "Add bill" : "Add income"}
               </button>
