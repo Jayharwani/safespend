@@ -16,6 +16,7 @@ export const defaultData: AppData = {
   permissionsSeen: false,
   allSetSeen: false,
   lastPaydayCelebrated: "",
+  lastNotified: "",
   setupComplete: false,
 };
 

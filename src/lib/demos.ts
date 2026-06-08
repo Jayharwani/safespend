@@ -53,6 +53,7 @@ export function getDemoData(scenario: "healthy" | "tight" | "danger"): AppData {
     permissionsSeen: true,
     allSetSeen: true,
     lastPaydayCelebrated: "",
+    lastNotified: "",
     setupComplete: true,
   };
   return base;

@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
 import { Check, Warning, Plus } from "../lib/icons";
@@ -13,6 +14,7 @@ interface TodayScreenProps {
   projection: BudgetProjection;
   onAdd: () => void;
   onEditBalance: () => void;
+  banner?: ReactNode;
 }
 
 const chipText: Record<BudgetStatus, string> = {
@@ -33,7 +35,13 @@ const stateColor: Record<BudgetStatus, string> = {
   over: "var(--over)",
 };
 
-export default function TodayScreen({ data, projection, onAdd, onEditBalance }: TodayScreenProps) {
+export default function TodayScreen({
+  data,
+  projection,
+  onAdd,
+  onEditBalance,
+  banner,
+}: TodayScreenProps) {
   const { safeToSpend, dailyAllowance, daysUntilPayday, upcomingBills, status } = projection;
   const paydayLabel = format(new Date(data.nextPayday), "MMM d");
   const ChipIcon = status === "healthy" ? Check : Warning;
@@ -56,6 +64,13 @@ export default function TodayScreen({ data, projection, onAdd, onEditBalance }: 
               {format(new Date(), "EEEE, MMMM d")}
             </p>
           </motion.header>
+
+          {/* Heads-up banner (over / tight / payday) */}
+          {banner && (
+            <motion.div variants={staggerItem} style={{ padding: "8px 20px 0" }}>
+              {banner}
+            </motion.div>
+          )}
 
           {/* 2 — Hero */}
           <motion.section variants={staggerItem} style={{ padding: "12px 20px 0" }}>

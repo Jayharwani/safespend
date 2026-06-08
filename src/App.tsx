@@ -6,6 +6,15 @@ import { defaultData, generateId } from "./lib/storage";
 import { initData, persist, clearData, exportData, parseImport } from "./lib/db";
 import { projectBudget } from "./lib/finance";
 import { getDemoData } from "./lib/demos";
+import { getHeadsUp } from "./lib/headsup";
+import {
+  notifyState,
+  requestNotify,
+  sendTestNotification,
+  sendHeadsUp,
+  type NotifyState,
+} from "./lib/notify";
+import HeadsUpBanner from "./components/HeadsUpBanner";
 import AppShell from "./components/AppShell";
 import TabBar from "./components/TabBar";
 import PageTransition from "./components/PageTransition";
@@ -34,8 +43,15 @@ export default function App() {
   const [editTarget, setEditTarget] = useState<EditTarget | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [showPayday, setShowPayday] = useState(false);
+  const [notifPerm, setNotifPerm] = useState<NotifyState>(() => notifyState());
+  const [bannerDismissed, setBannerDismissed] = useState(false);
 
   const projection = useMemo(() => projectBudget(data), [data]);
+  const paydayLabel = format(new Date(data.nextPayday), "MMM d");
+  const headsUp = useMemo(
+    () => getHeadsUp(projection, paydayLabel),
+    [projection, paydayLabel]
+  );
 
   useEffect(() => {
     const t = setTimeout(() => setShowSplash(false), 2600);
@@ -65,6 +81,18 @@ export default function App() {
       setShowPayday(true);
     }
   }, [data.setupComplete, data.nextPayday, data.lastPaydayCelebrated, projection.daysUntilPayday, showSplash]);
+
+  // On-open local notification: fire at most once per day when there's a
+  // notify-worthy heads-up (a projected dip, or payday) and permission is on.
+  useEffect(() => {
+    if (!hydrated || !data.setupComplete || showSplash) return;
+    if (notifPerm !== "granted" || !headsUp?.notify) return;
+    const today = format(new Date(), "yyyy-MM-dd");
+    if (data.lastNotified === today) return;
+    sendHeadsUp(headsUp.message, headsUp.tag);
+    updateData({ lastNotified: today });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hydrated, data.setupComplete, showSplash, notifPerm, headsUp]);
 
   const updateData = useCallback((patch: Partial<AppData>) => {
     setData((prev) => {
@@ -174,6 +202,33 @@ export default function App() {
     setShowPayday(false);
   };
 
+  const handleEnableNotifications = async () => {
+    const state = await requestNotify();
+    setNotifPerm(state);
+    if (state === "granted") setToast("Alerts are on");
+    else if (state === "denied") setToast("Alerts are blocked — enable them in your browser settings");
+  };
+
+  const handleTestNotification = async () => {
+    if (notifyState() !== "granted") {
+      const state = await requestNotify();
+      setNotifPerm(state);
+      if (state !== "granted") {
+        setToast("Allow notifications first");
+        return;
+      }
+    }
+    const ok = await sendTestNotification();
+    setToast(ok ? "Test notification sent" : "Couldn't send a notification");
+  };
+
+  // Onboarding "Turn on alerts": the friendly pre-ask before the system prompt.
+  const handleOnboardingAllow = async () => {
+    const state = await requestNotify();
+    setNotifPerm(state);
+    updateData({ permissionsSeen: true });
+  };
+
   if (showSplash || !hydrated) return <SplashScreen />;
 
   if (!data.onboardingComplete) {
@@ -199,7 +254,7 @@ export default function App() {
     return (
       <PageTransition id="permissions">
         <PermissionsScreen
-          onAllow={() => updateData({ permissionsSeen: true })}
+          onAllow={handleOnboardingAllow}
           onSkip={() => updateData({ permissionsSeen: true })}
         />
       </PageTransition>
@@ -243,6 +298,15 @@ export default function App() {
               projection={projection}
               onAdd={() => setSheetOpen(true)}
               onEditBalance={() => setEditTarget({ kind: "balance", balance: data.balance })}
+              banner={
+                headsUp && !bannerDismissed ? (
+                  <HeadsUpBanner
+                    headsUp={headsUp}
+                    onAdjust={() => setTab("plan")}
+                    onDismiss={() => setBannerDismissed(true)}
+                  />
+                ) : null
+              }
             />
           )}
           {tab === "plan" && <PlanScreen data={data} onEdit={setEditTarget} />}
@@ -252,6 +316,9 @@ export default function App() {
               onReset={handleReset}
               onExport={handleExport}
               onImport={handleImport}
+              notifPerm={notifPerm}
+              onEnableNotifications={handleEnableNotifications}
+              onTestNotification={handleTestNotification}
               onLoadDemo={handleLoadDemo}
               onPreviewPayday={() => setShowPayday(true)}
             />

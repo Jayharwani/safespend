@@ -39,6 +39,8 @@ export default defineConfig({
         navigateFallback: "/index.html",
         cleanupOutdatedCaches: true,
         clientsClaim: true,
+        // Custom SW code for handling notification taps.
+        importScripts: ["notification-sw.js"],
         runtimeCaching: [
           {
             urlPattern: ({ url }) => url.origin === "https://fonts.googleapis.com",

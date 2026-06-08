@@ -30,6 +30,7 @@ export interface AppData {
   permissionsSeen: boolean;
   allSetSeen: boolean;
   lastPaydayCelebrated: string;
+  lastNotified: string;
   setupComplete: boolean;
 }
 
