@@ -87,7 +87,7 @@ export default function PaydayScreen({ safeToSpend, onDismiss }: PaydayScreenPro
             fontWeight: 600,
             lineHeight: 1,
             letterSpacing: "-0.03em",
-            color: "var(--accent)",
+            color: "var(--accent-deep)",
             marginBottom: 32,
           }}
         />

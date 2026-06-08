@@ -12,7 +12,7 @@ export default function SignUpScreen({ onGuest }: SignUpScreenProps) {
   return (
     <>
       <AuroraBackground />
-      <div className="app-shell">
+      <div className="app-shell" role="main">
         <motion.div
           variants={staggerContainer}
           initial="initial"

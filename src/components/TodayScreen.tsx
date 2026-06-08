@@ -30,7 +30,7 @@ const chipClass: Record<BudgetStatus, string> = {
 };
 
 const stateColor: Record<BudgetStatus, string> = {
-  healthy: "var(--accent)",
+  healthy: "var(--accent-deep)",
   tight: "var(--tight)",
   over: "var(--over)",
 };

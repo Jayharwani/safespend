@@ -35,6 +35,7 @@ export default function InsightsScreen({ data, onBack }: InsightsScreenProps) {
   return (
     <motion.div
       className="app-shell"
+      role="main"
       variants={staggerContainer}
       initial="initial"
       animate="animate"

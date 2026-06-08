@@ -26,10 +26,11 @@
   --accent-line: rgba(14, 158, 107, 0.22);
   --on-accent: #FFFFFF;
 
-  /* Semantic states — refined, used ONLY for state */
+  /* Semantic states — refined, used ONLY for state. Darkened to meet AA on
+     both white and their own soft tints. */
   --safe: var(--accent);
-  --tight: #C0892E;
-  --over: #C25B47;
+  --tight: #976712;
+  --over: #B14A37;
   --safe-bg: var(--accent-soft);
   --tight-bg: #F8EFD9;
   --over-bg: #F7E6E1;

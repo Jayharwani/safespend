@@ -38,7 +38,7 @@ export default function OnboardingScreen({ onComplete, onSkip }: OnboardingScree
   return (
     <>
       <AuroraBackground />
-      <div className="app-shell">
+      <div className="app-shell" role="main">
         <div
           style={{
             flex: 1,

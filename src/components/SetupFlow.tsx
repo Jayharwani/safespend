@@ -68,7 +68,7 @@ export default function SetupFlow({ onComplete }: SetupFlowProps) {
   return (
     <>
       <AuroraBackground />
-      <div className="app-shell">
+      <div className="app-shell" role="main">
         <div
           style={{
             flex: 1,

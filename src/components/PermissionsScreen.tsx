@@ -12,7 +12,7 @@ export default function PermissionsScreen({ onAllow, onSkip }: PermissionsScreen
   return (
     <>
       <AuroraBackground />
-      <div className="app-shell">
+      <div className="app-shell" role="main">
         <motion.div
           variants={staggerContainer}
           initial="initial"

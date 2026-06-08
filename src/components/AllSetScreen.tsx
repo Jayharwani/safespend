@@ -17,7 +17,7 @@ export default function AllSetScreen({ safeToSpend, onContinue }: AllSetScreenPr
   return (
     <>
       <AuroraBackground />
-      <div className="app-shell">
+      <div className="app-shell" role="main">
         <div
           style={{
             flex: 1,
@@ -86,7 +86,7 @@ export default function AllSetScreen({ safeToSpend, onContinue }: AllSetScreenPr
                 letterSpacing: "-0.03em",
                 color:
                   variant === "safe"
-                    ? "var(--accent)"
+                    ? "var(--accent-deep)"
                     : variant === "tight"
                       ? "var(--tight)"
                       : "var(--over)",

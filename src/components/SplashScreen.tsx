@@ -9,6 +9,7 @@ export default function SplashScreen() {
       <AuroraBackground />
       <div
         className="app-shell"
+        role="main"
         style={{
           alignItems: "center",
           justifyContent: "center",
