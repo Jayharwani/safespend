@@ -4,8 +4,9 @@
   </linearGradient></defs>
   <rect x="64" y="64" width="896" height="896" rx="220" fill="url(#g)"/>
   
-    <rect x="246" y="332" width="116" height="360" rx="58" fill="#FFFFFF"/>
-    <rect x="662" y="332" width="116" height="360" rx="58" fill="#FFFFFF"/>
-    <rect x="246" y="454" width="532" height="116" rx="58" fill="#FFFFFF"/>
-  
+    <g fill="none" stroke="#FFFFFF" stroke-width="74" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M300 322 H724"/>
+      <path d="M512 754 V 410"/>
+      <path d="M444 470 L512 402 L580 470"/>
+    </g>
 </svg>

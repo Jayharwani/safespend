@@ -24,25 +24,18 @@ const ACCENT_DEEP = "#0A7A52";
 const BG = "#F5F7F6";
 
 // --- Source SVGs ---------------------------------------------------------
-// White "H" drawn as vector rects (no font dependency).
+// "Headroom" mark: a ceiling line with an arrow rising toward it — the room
+// you have before you hit your limit. Drawn as strokes (no font dependency).
 function hMark(scale = 1, color = "#FFFFFF") {
-  // base geometry on a 1024 canvas, centred
-  const cx = 512;
-  const cy = 512;
-  const barW = 116 * scale;
-  const barH = 360 * scale;
-  const gap = 150 * scale; // distance from centre to inner edge of each bar
-  const crossH = 116 * scale;
-  const leftX = cx - gap - barW;
-  const rightX = cx + gap;
-  const top = cy - barH / 2;
-  const crossY = cy - crossH / 2;
-  const r = barW / 2;
-  return `
-    <rect x="${leftX}" y="${top}" width="${barW}" height="${barH}" rx="${r}" fill="${color}"/>
-    <rect x="${rightX}" y="${top}" width="${barW}" height="${barH}" rx="${r}" fill="${color}"/>
-    <rect x="${leftX}" y="${crossY}" width="${rightX + barW - leftX}" height="${crossH}" rx="${r}" fill="${color}"/>
-  `;
+  const sw = 74; // stroke width on a 1024 canvas
+  const mark = `
+    <g fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M300 322 H724"/>
+      <path d="M512 754 V 410"/>
+      <path d="M444 470 L512 402 L580 470"/>
+    </g>`;
+  if (scale === 1) return mark;
+  return `<g transform="translate(512 512) scale(${scale}) translate(-512 -512)">${mark}</g>`;
 }
 
 const roundedSquare = `<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
