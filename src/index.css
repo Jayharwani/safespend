@@ -14,10 +14,10 @@
   --hairline: #E7EBE8;
   --hairline-strong: #DCE2DD;
 
-  /* Text — warm near-black, never #000 */
+  /* Text — warm near-black, never #000. Faint passes WCAG AA on white (≈4.6:1). */
   --ink: #0E1413;
   --ink-soft: #5B6560;
-  --ink-faint: #9AA39D;
+  --ink-faint: #6B716B;
 
   /* THE single accent — deep emerald */
   --accent: #0E9E6B;

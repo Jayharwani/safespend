@@ -133,8 +133,8 @@ export default function OnboardingScreen({ onComplete, onSkip }: OnboardingScree
               style={{
                 display: "flex",
                 justifyContent: "center",
-                gap: 8,
-                marginBottom: 28,
+                gap: 4,
+                marginBottom: 24,
               }}
             >
               {CARDS.map((_, i) => (
@@ -142,17 +142,31 @@ export default function OnboardingScreen({ onComplete, onSkip }: OnboardingScree
                   key={i}
                   type="button"
                   onClick={() => setIndex(i)}
-                  aria-label={`Slide ${i + 1}`}
+                  aria-label={`Go to slide ${i + 1}`}
                   style={{
-                    height: 8,
-                    width: i === index ? 28 : 8,
-                    borderRadius: 999,
+                    // 28px tap target (meets WCAG target-size) with a small visible dot inside
+                    height: 28,
+                    width: i === index ? 44 : 28,
+                    padding: 0,
                     border: "none",
-                    background: i === index ? "var(--accent)" : "var(--hairline-strong)",
-                    transition:
-                      "width 360ms cubic-bezier(0.16, 1, 0.3, 1), background 280ms ease",
+                    background: "none",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                   }}
-                />
+                >
+                  <span
+                    style={{
+                      display: "block",
+                      height: 8,
+                      width: i === index ? 28 : 8,
+                      borderRadius: 999,
+                      background: i === index ? "var(--accent)" : "var(--hairline-strong)",
+                      transition:
+                        "width 360ms cubic-bezier(0.16, 1, 0.3, 1), background 280ms ease",
+                    }}
+                  />
+                </button>
               ))}
             </div>
 
