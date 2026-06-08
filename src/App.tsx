@@ -2,7 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { format, isSameDay, parseISO } from "date-fns";
 import { AnimatePresence } from "framer-motion";
 import type { AppData, Bill, OverlayScreen, PayFrequency, TabId } from "./types";
-import { loadData, saveData, generateId } from "./lib/storage";
+import { defaultData, generateId } from "./lib/storage";
+import { initData, persist, clearData, exportData, parseImport } from "./lib/db";
 import { projectBudget } from "./lib/finance";
 import { getDemoData } from "./lib/demos";
 import AppShell from "./components/AppShell";
@@ -24,7 +25,8 @@ import EditSheet, { type EditTarget } from "./components/EditSheet";
 import Toast from "./components/Toast";
 
 export default function App() {
-  const [data, setData] = useState<AppData>(loadData);
+  const [data, setData] = useState<AppData>(defaultData);
+  const [hydrated, setHydrated] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
   const [tab, setTab] = useState<TabId>("today");
   const [overlay, setOverlay] = useState<OverlayScreen>(null);
@@ -40,6 +42,20 @@ export default function App() {
     return () => clearTimeout(t);
   }, []);
 
+  // Hydrate from IndexedDB (migrating any legacy localStorage on first run).
+  useEffect(() => {
+    let alive = true;
+    initData().then((loaded) => {
+      if (alive) {
+        setData(loaded);
+        setHydrated(true);
+      }
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
   useEffect(() => {
     if (!data.setupComplete || showSplash) return;
     const today = format(new Date(), "yyyy-MM-dd");
@@ -53,7 +69,7 @@ export default function App() {
   const updateData = useCallback((patch: Partial<AppData>) => {
     setData((prev) => {
       const next = { ...prev, ...patch };
-      saveData(next);
+      persist(next);
       return next;
     });
   }, []);
@@ -118,20 +134,39 @@ export default function App() {
   };
 
   const handleReset = () => {
-    if (!window.confirm("Delete all your data and start over?")) return;
-    localStorage.removeItem("safespend-data");
-    setData(loadData());
-    setTab("today");
-    setOverlay(null);
-    setShowSplash(true);
-    setTimeout(() => setShowSplash(false), 2600);
+    if (!window.confirm("Delete all your data and start over? This can't be undone.")) return;
+    clearData().then(() => {
+      setData({ ...defaultData });
+      setTab("today");
+      setOverlay(null);
+      setShowSplash(true);
+      setTimeout(() => setShowSplash(false), 2600);
+    });
   };
 
   const handleLoadDemo = (scenario: "healthy" | "tight" | "danger") => {
     const demo = getDemoData(scenario);
     setData(demo);
-    saveData(demo);
+    persist(demo);
     setTab("today");
+  };
+
+  const handleExport = () => {
+    exportData(data);
+    setToast("Backup downloaded");
+  };
+
+  const handleImport = (text: string) => {
+    try {
+      const imported = parseImport(text);
+      setData(imported);
+      persist(imported);
+      setTab("today");
+      setOverlay(null);
+      setToast("Backup restored");
+    } catch {
+      setToast("Couldn't read that backup file");
+    }
   };
 
   const dismissPayday = () => {
@@ -139,7 +174,7 @@ export default function App() {
     setShowPayday(false);
   };
 
-  if (showSplash) return <SplashScreen />;
+  if (showSplash || !hydrated) return <SplashScreen />;
 
   if (!data.onboardingComplete) {
     return (
@@ -215,6 +250,8 @@ export default function App() {
             <MenuScreen
               onOpenInsights={() => setOverlay("insights")}
               onReset={handleReset}
+              onExport={handleExport}
+              onImport={handleImport}
               onLoadDemo={handleLoadDemo}
               onPreviewPayday={() => setShowPayday(true)}
             />

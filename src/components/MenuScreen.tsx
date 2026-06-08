@@ -1,11 +1,20 @@
 import { useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { ChartBar, CaretRight, ArrowsClockwise, Sparkle } from "../lib/icons";
+import {
+  ChartBar,
+  CaretRight,
+  ArrowsClockwise,
+  Sparkle,
+  DownloadSimple,
+  UploadSimple,
+} from "../lib/icons";
 import { staggerContainer, staggerItem } from "../lib/motion";
 
 interface MenuScreenProps {
   onOpenInsights: () => void;
   onReset: () => void;
+  onExport: () => void;
+  onImport: (text: string) => void;
   onLoadDemo: (scenario: "healthy" | "tight" | "danger") => void;
   onPreviewPayday: () => void;
 }
@@ -19,16 +28,28 @@ const DEMOS = [
 export default function MenuScreen({
   onOpenInsights,
   onReset,
+  onExport,
+  onImport,
   onLoadDemo,
   onPreviewPayday,
 }: MenuScreenProps) {
   const [showDev, setShowDev] = useState(false);
   const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const fileInput = useRef<HTMLInputElement | null>(null);
   const startPress = () => {
     pressTimer.current = setTimeout(() => setShowDev((v) => !v), 600);
   };
   const cancelPress = () => {
     if (pressTimer.current) clearTimeout(pressTimer.current);
+  };
+
+  const onFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => onImport(String(reader.result ?? ""));
+    reader.readAsText(file);
+    e.target.value = ""; // allow re-importing the same file
   };
 
   return (
@@ -75,6 +96,50 @@ export default function MenuScreen({
               <CaretRight size={18} weight="bold" color="var(--ink-faint)" />
             </button>
           </div>
+        </motion.section>
+
+        {/* Backup */}
+        <motion.section variants={staggerItem} style={{ padding: "20px 24px 0" }}>
+          <p className="section-header">Backup</p>
+          <div className="card" style={{ padding: 0 }}>
+            <button
+              type="button"
+              onClick={onExport}
+              className="row"
+              style={{ width: "100%", background: "none", border: "none", textAlign: "left", cursor: "pointer" }}
+            >
+              <span className="chip-ico">
+                <DownloadSimple size={20} weight="duotone" />
+              </span>
+              <div className="main">
+                <p>Export a backup</p>
+                <p className="sub">Download your data as a file</p>
+              </div>
+              <CaretRight size={18} weight="bold" color="var(--ink-faint)" />
+            </button>
+            <button
+              type="button"
+              onClick={() => fileInput.current?.click()}
+              className="row"
+              style={{ width: "100%", background: "none", border: "none", textAlign: "left", cursor: "pointer" }}
+            >
+              <span className="chip-ico">
+                <UploadSimple size={20} weight="duotone" />
+              </span>
+              <div className="main">
+                <p>Restore from backup</p>
+                <p className="sub">Import a previously saved file</p>
+              </div>
+              <CaretRight size={18} weight="bold" color="var(--ink-faint)" />
+            </button>
+          </div>
+          <input
+            ref={fileInput}
+            type="file"
+            accept="application/json,.json"
+            onChange={onFile}
+            style={{ display: "none" }}
+          />
         </motion.section>
 
         <motion.section variants={staggerItem} style={{ padding: "20px 24px 0" }}>
