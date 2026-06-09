@@ -9,17 +9,33 @@ interface SplashIntroProps {
 }
 
 /* The emerald sphere — same matte recipe as FloatingOrb, fully CSS so it
-   loads instantly and stays crisp at any size (no PNG / WebGL). */
+   loads instantly and stays crisp at any size (no PNG / WebGL).
+   Layered: a float wrapper (continuous gentle life) holds the sphere
+   (which the timeline drives), plus a soft glow that blooms on the
+   "safe to spend" beat. */
 function Sphere() {
   return (
     <>
+      {/* warm floor tint (fades in subtly at the safe-to-spend beat) */}
+      <div
+        id="si-floor"
+        style={{
+          position: "absolute",
+          inset: "-40%",
+          background:
+            "radial-gradient(circle at 50% 38%, rgba(14,158,107,0.10) 0%, transparent 55%)",
+          opacity: 0,
+          pointerEvents: "none",
+        }}
+      />
+
       {/* contact shadow */}
       <div
         id="si-shadow"
         style={{
           position: "absolute",
           left: "calc(50% - 58px)",
-          top: 182,
+          top: 184,
           width: 116,
           height: 20,
           borderRadius: "50%",
@@ -29,38 +45,66 @@ function Sphere() {
           willChange: "transform, opacity",
         }}
       />
-      {/* sphere */}
+
+      {/* glow bloom (centered on the sphere; blooms once on the pulse) */}
       <div
-        id="si-sphere"
+        id="si-glow"
+        style={{
+          position: "absolute",
+          left: "calc(50% - 95px)",
+          top: 14,
+          width: 190,
+          height: 190,
+          borderRadius: "50%",
+          background:
+            "radial-gradient(circle, rgba(20,168,119,0.55) 0%, rgba(20,168,119,0) 62%)",
+          opacity: 0,
+          willChange: "transform, opacity",
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* float wrapper — gentle continuous life */}
+      <div
+        id="si-floatwrap"
         style={{
           position: "absolute",
           left: "calc(50% - 75px)",
           top: 34,
           width: 150,
           height: 150,
-          borderRadius: "50%",
-          background:
-            "radial-gradient(circle at 33% 28%, #5BD3A0 0%, #14A877 42%, #0A5C3E 100%)",
-          boxShadow:
-            "inset -18px -20px 38px rgba(0,0,0,0.32), inset 8px 8px 22px rgba(255,255,255,0.4)",
-          opacity: 0,
-          willChange: "transform, opacity",
+          willChange: "transform",
         }}
       >
-        {/* specular highlight */}
         <div
+          id="si-sphere"
           style={{
-            position: "absolute",
-            top: 22,
-            left: 32,
-            width: 40,
-            height: 28,
+            width: 150,
+            height: 150,
             borderRadius: "50%",
             background:
-              "radial-gradient(ellipse, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0) 70%)",
-            filter: "blur(3px)",
+              "radial-gradient(circle at 33% 28%, #5BD3A0 0%, #14A877 42%, #0A5C3E 100%)",
+            boxShadow:
+              "inset -18px -20px 38px rgba(0,0,0,0.32), inset 8px 8px 22px rgba(255,255,255,0.4)",
+            opacity: 0,
+            willChange: "transform, opacity",
           }}
-        />
+        >
+          {/* specular highlight */}
+          <div
+            style={{
+              position: "absolute",
+              top: 22,
+              left: 32,
+              width: 40,
+              height: 28,
+              borderRadius: "50%",
+              background:
+                "radial-gradient(ellipse, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0) 70%)",
+              filter: "blur(3px)",
+            }}
+          />
+        </div>
       </div>
     </>
   );
@@ -87,7 +131,7 @@ export default function SplashIntro({ onDone, mode = "full" }: SplashIntroProps)
         const el = amountRef.current;
         if (!el) return res();
         const start = performance.now();
-        const ease = (t: number) => 1 - Math.pow(1 - t, 3);
+        const ease = (t: number) => 1 - Math.pow(1 - t, 4); // quart-out: snappy then gentle
         const tick = (now: number) => {
           const p = Math.min((now - start) / ms, 1);
           el.textContent = "$" + Math.round(from + (to - from) * ease(p)).toLocaleString();
@@ -104,7 +148,6 @@ export default function SplashIntro({ onDone, mode = "full" }: SplashIntroProps)
 
     (async () => {
       if (reduced) {
-        // Static brand lockup, brief hold, then go.
         await animate("#si-sphere", { opacity: 1 }, { duration: 0 });
         await animate("#si-shadow", { opacity: 1 }, { duration: 0 });
         await animate("#si-wordmark", { opacity: 1, y: 0 }, { duration: 0 });
@@ -114,7 +157,6 @@ export default function SplashIntro({ onDone, mode = "full" }: SplashIntroProps)
       }
 
       if (!full) {
-        // Short cold-start: sphere arrives, brand appears (~1.2s).
         animate("#si-shadow", { scaleX: [0.5, 1], opacity: [0, 1] }, { duration: 0.7, ease: EASE });
         await animate(
           "#si-sphere",
@@ -127,46 +169,70 @@ export default function SplashIntro({ onDone, mode = "full" }: SplashIntroProps)
         return finish();
       }
 
-      // ---- Full story (calm, ~8.5s) ----
-      // Arrive
-      animate("#si-shadow", { scaleX: [0.45, 1], opacity: [0, 1] }, { duration: 1.1, ease: EASE });
+      // ---- Full story (calm + satisfying, ~8.5s) ----
+
+      // Arrive: drop in, dip just past the ground, settle (squash, no hard bounce)
+      animate(
+        "#si-shadow",
+        { scaleX: [0.4, 1.14, 1], opacity: [0, 0.95, 1] },
+        { duration: 1.15, ease: EASE }
+      );
       await animate(
         "#si-sphere",
-        { y: [-130, 0], scale: [0.85, 1], opacity: [0, 1] },
-        { duration: 1.1, ease: EASE }
+        { y: [-135, 6, 0], scale: [0.84, 1.05, 1], opacity: [0, 1, 1] },
+        { duration: 1.15, ease: EASE }
       );
-      await wait(350);
+      // start the continuous gentle float once it has landed
+      animate(
+        "#si-floatwrap",
+        { y: [0, -6, 0] },
+        { duration: 3.6, ease: "easeInOut", repeat: Infinity }
+      );
+      await wait(300);
 
       // Your balance — rise in, then hold so it reads
       await animate("#si-amount", { y: [18, 0], opacity: [0, 1] }, { duration: 0.7, ease: EASE });
       await wait(650);
 
-      // Subtract what's coming: chips fly off + count down (slow + dramatic)
+      // Subtract what's coming: chips pop, then peel off and drift away
       animate(
         ".si-chip",
-        { x: [0, 96], y: [0, -46], opacity: [1, 0], scale: [1, 0.9] },
-        { duration: 1.0, delay: stagger(0.14), ease: EASE }
+        { y: [0, 6, -50], x: [0, -4, 98], rotate: [0, -5, 12], scale: [1, 1.12, 0.82], opacity: [1, 1, 0] },
+        { duration: 1.05, delay: stagger(0.14), ease: EASE }
       );
+      // number ticks down while the bills leave
       await countDown(1200, 885, 1700);
-      await wait(450);
+      // satisfying little settle on the final number
+      animate("#si-amount", { scale: [1, 1.09, 1] }, { duration: 0.5, ease: EASE });
+      await wait(400);
 
-      // What's actually yours: crossfade label, gentle pulse, hold
+      // What's actually yours: warm the floor, crossfade label, pulse + glow bloom
+      animate("#si-floor", { opacity: [0, 1] }, { duration: 0.9, ease: EASE });
       animate("#si-label", { opacity: 0, y: -6 }, { duration: 0.35, ease: EASE });
-      animate("#si-label2", { opacity: 1, y: [6, 0] }, { duration: 0.5, ease: EASE });
-      await animate("#si-sphere", { scale: [1, 1.07, 1] }, { duration: 0.85, ease: EASE });
+      animate("#si-label2", { opacity: 1, y: [8, 0] }, { duration: 0.55, ease: EASE });
+      animate(
+        "#si-glow",
+        { opacity: [0, 0.55, 0], scale: [0.5, 1.7] },
+        { duration: 1.1, ease: EASE }
+      );
+      await animate("#si-sphere", { scale: [1, 1.08, 1] }, { duration: 0.9, ease: EASE });
       await wait(750);
 
       // Become the brand
       animate("#si-amount", { opacity: 0, y: -18 }, { duration: 0.5, ease: EASE });
       animate("#si-label2", { opacity: 0, y: -18 }, { duration: 0.5, ease: EASE });
       await wait(350);
-      // sphere rises + shrinks; shadow grows + lightens (object lifts off ground)
-      animate("#si-shadow", { scaleX: 1.18, opacity: 0.4 }, { duration: 0.7, ease: EASE });
-      await animate("#si-sphere", { y: -48, scale: 0.74 }, { duration: 0.7, ease: EASE });
+      // sphere lifts + shrinks; shadow grows + lightens (object off the ground)
+      animate("#si-shadow", { scaleX: 1.2, opacity: 0.36 }, { duration: 0.75, ease: EASE });
+      await animate("#si-sphere", { y: -48, scale: 0.72 }, { duration: 0.75, ease: EASE });
 
-      // Brand
-      animate("#si-wordmark", { y: [16, 0], opacity: [0, 1] }, { duration: 0.6, ease: EASE });
-      await animate("#si-tagline", { opacity: [0, 1] }, { duration: 0.5, ease: EASE });
+      // Brand lockup
+      animate(
+        "#si-wordmark",
+        { y: [18, 0], opacity: [0, 1], scale: [0.97, 1] },
+        { duration: 0.65, ease: EASE }
+      );
+      await animate("#si-tagline", { y: [8, 0], opacity: [0, 1] }, { duration: 0.55, ease: EASE });
 
       await wait(1000);
       finish();
@@ -182,8 +248,8 @@ export default function SplashIntro({ onDone, mode = "full" }: SplashIntroProps)
     <motion.div
       ref={scope}
       onClick={finish}
-      exit={{ opacity: 0, scale: 1.04 }}
-      transition={{ duration: 0.45, ease: EASE }}
+      exit={{ opacity: 0, scale: 1.05 }}
+      transition={{ duration: 0.5, ease: EASE }}
       style={{
         position: "fixed",
         inset: 0,
@@ -204,9 +270,9 @@ export default function SplashIntro({ onDone, mode = "full" }: SplashIntroProps)
           <>
             {/* bill chips that peel off the number */}
             {[
-              { label: "Rent", left: "calc(50% - 78px)", top: 196 },
-              { label: "Phone", left: "calc(50% + 10px)", top: 188 },
-              { label: "Car", left: "calc(50% + 30px)", top: 214 },
+              { label: "Rent", left: "calc(50% - 80px)", top: 196 },
+              { label: "Phone", left: "calc(50% + 8px)", top: 188 },
+              { label: "Car", left: "calc(50% + 28px)", top: 216 },
             ].map((c) => (
               <span
                 key={c.label}
@@ -285,7 +351,7 @@ export default function SplashIntro({ onDone, mode = "full" }: SplashIntroProps)
           </>
         )}
 
-        {/* brand lockup (fades in at the end / shown in short + reduced) */}
+        {/* brand lockup */}
         <div
           id="si-wordmark"
           className="wordmark"
@@ -313,7 +379,7 @@ export default function SplashIntro({ onDone, mode = "full" }: SplashIntroProps)
             fontSize: 15,
             color: "var(--ink-soft)",
             opacity: 0,
-            willChange: "opacity",
+            willChange: "transform, opacity",
           }}
         >
           What you can actually spend.
