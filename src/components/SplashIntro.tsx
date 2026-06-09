@@ -100,7 +100,7 @@ export default function SplashIntro({ onDone, mode = "full" }: SplashIntroProps)
     const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
     // Safety net: never trap the user on the splash if an animation stalls.
-    const safety = setTimeout(finish, full ? 7000 : 2500);
+    const safety = setTimeout(finish, full ? 12000 : 2800);
 
     (async () => {
       if (reduced) {
@@ -127,44 +127,48 @@ export default function SplashIntro({ onDone, mode = "full" }: SplashIntroProps)
         return finish();
       }
 
-      // ---- Full story ----
+      // ---- Full story (calm, ~8.5s) ----
       // Arrive
-      animate("#si-shadow", { scaleX: [0.45, 1], opacity: [0, 1] }, { duration: 0.8, ease: EASE });
+      animate("#si-shadow", { scaleX: [0.45, 1], opacity: [0, 1] }, { duration: 1.1, ease: EASE });
       await animate(
         "#si-sphere",
         { y: [-130, 0], scale: [0.85, 1], opacity: [0, 1] },
-        { duration: 0.8, ease: EASE }
+        { duration: 1.1, ease: EASE }
       );
+      await wait(350);
 
-      // Your balance
-      await animate("#si-amount", { y: [16, 0], opacity: [0, 1] }, { duration: 0.5, ease: EASE });
+      // Your balance — rise in, then hold so it reads
+      await animate("#si-amount", { y: [18, 0], opacity: [0, 1] }, { duration: 0.7, ease: EASE });
+      await wait(650);
 
-      // Subtract what's coming: chips fly off + count down
+      // Subtract what's coming: chips fly off + count down (slow + dramatic)
       animate(
         ".si-chip",
-        { x: [0, 86], y: [0, -40], opacity: [1, 0], scale: [1, 0.9] },
-        { duration: 0.7, delay: stagger(0.09), ease: EASE }
+        { x: [0, 96], y: [0, -46], opacity: [1, 0], scale: [1, 0.9] },
+        { duration: 1.0, delay: stagger(0.14), ease: EASE }
       );
-      await countDown(1200, 885, 1000);
+      await countDown(1200, 885, 1700);
+      await wait(450);
 
-      // What's actually yours: crossfade label, gentle pulse
-      animate("#si-label", { opacity: 0, y: -6 }, { duration: 0.25, ease: EASE });
-      animate("#si-label2", { opacity: 1, y: [6, 0] }, { duration: 0.35, ease: EASE });
-      await animate("#si-sphere", { scale: [1, 1.07, 1] }, { duration: 0.6, ease: EASE });
+      // What's actually yours: crossfade label, gentle pulse, hold
+      animate("#si-label", { opacity: 0, y: -6 }, { duration: 0.35, ease: EASE });
+      animate("#si-label2", { opacity: 1, y: [6, 0] }, { duration: 0.5, ease: EASE });
+      await animate("#si-sphere", { scale: [1, 1.07, 1] }, { duration: 0.85, ease: EASE });
+      await wait(750);
 
       // Become the brand
-      animate("#si-amount", { opacity: 0, y: -16 }, { duration: 0.4, ease: EASE });
-      animate("#si-label2", { opacity: 0, y: -16 }, { duration: 0.4, ease: EASE });
-      await wait(220);
+      animate("#si-amount", { opacity: 0, y: -18 }, { duration: 0.5, ease: EASE });
+      animate("#si-label2", { opacity: 0, y: -18 }, { duration: 0.5, ease: EASE });
+      await wait(350);
       // sphere rises + shrinks; shadow grows + lightens (object lifts off ground)
-      animate("#si-shadow", { scaleX: 1.18, opacity: 0.4 }, { duration: 0.55, ease: EASE });
-      await animate("#si-sphere", { y: -46, scale: 0.74 }, { duration: 0.55, ease: EASE });
+      animate("#si-shadow", { scaleX: 1.18, opacity: 0.4 }, { duration: 0.7, ease: EASE });
+      await animate("#si-sphere", { y: -48, scale: 0.74 }, { duration: 0.7, ease: EASE });
 
       // Brand
-      animate("#si-wordmark", { y: [14, 0], opacity: [0, 1] }, { duration: 0.5, ease: EASE });
-      await animate("#si-tagline", { opacity: [0, 1] }, { duration: 0.4, ease: EASE });
+      animate("#si-wordmark", { y: [16, 0], opacity: [0, 1] }, { duration: 0.6, ease: EASE });
+      await animate("#si-tagline", { opacity: [0, 1] }, { duration: 0.5, ease: EASE });
 
-      await wait(550);
+      await wait(1000);
       finish();
     })();
 

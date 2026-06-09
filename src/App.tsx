@@ -39,12 +39,8 @@ export default function App() {
   const [data, setData] = useState<AppData>(defaultData);
   const [hydrated, setHydrated] = useState(false);
   const [introDone, setIntroDone] = useState(false);
-  // Full story intro on first ever launch; short sphere+wordmark afterwards.
-  const introMode = useRef<"full" | "short">(
-    typeof localStorage !== "undefined" && localStorage.getItem("hr-intro-played")
-      ? "short"
-      : "full"
-  );
+  // Play the full story intro on every cold start.
+  const introMode = useRef<"full" | "short">("full");
   const [tab, setTab] = useState<TabId>("today");
   const [overlay, setOverlay] = useState<OverlayScreen>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -185,12 +181,6 @@ export default function App() {
   };
 
   const handleIntroDone = () => {
-    try {
-      localStorage.setItem("hr-intro-played", "1");
-    } catch {
-      /* ignore */
-    }
-    introMode.current = "short";
     setIntroDone(true);
   };
 
