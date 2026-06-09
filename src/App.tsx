@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, lazy, Suspense } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, lazy, Suspense } from "react";
 import { format, isSameDay, parseISO } from "date-fns";
 import { AnimatePresence } from "framer-motion";
 import type { AppData, Bill, OverlayScreen, PayFrequency, TabId } from "./types";
@@ -19,7 +19,7 @@ import HeadsUpBanner from "./components/HeadsUpBanner";
 import AppShell from "./components/AppShell";
 import TabBar from "./components/TabBar";
 import PageTransition from "./components/PageTransition";
-import SplashScreen from "./components/SplashScreen";
+import SplashIntro from "./components/SplashIntro";
 import OnboardingScreen from "./components/OnboardingScreen";
 import SignUpScreen from "./components/SignUpScreen";
 import PermissionsScreen from "./components/PermissionsScreen";
@@ -38,7 +38,13 @@ import Toast from "./components/Toast";
 export default function App() {
   const [data, setData] = useState<AppData>(defaultData);
   const [hydrated, setHydrated] = useState(false);
-  const [showSplash, setShowSplash] = useState(true);
+  const [introDone, setIntroDone] = useState(false);
+  // Full story intro on first ever launch; short sphere+wordmark afterwards.
+  const introMode = useRef<"full" | "short">(
+    typeof localStorage !== "undefined" && localStorage.getItem("hr-intro-played")
+      ? "short"
+      : "full"
+  );
   const [tab, setTab] = useState<TabId>("today");
   const [overlay, setOverlay] = useState<OverlayScreen>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -55,10 +61,9 @@ export default function App() {
     [projection, paydayLabel]
   );
 
-  useEffect(() => {
-    const t = setTimeout(() => setShowSplash(false), 2600);
-    return () => clearTimeout(t);
-  }, []);
+  // The animated intro plays until it calls onDone (introDone) AND data is
+  // hydrated; the destination screen reveals beneath it via the exit.
+  const splashActive = !introDone || !hydrated;
 
   // Hydrate from IndexedDB (migrating any legacy localStorage on first run).
   useEffect(() => {
@@ -81,26 +86,26 @@ export default function App() {
   }, [data.currency]);
 
   useEffect(() => {
-    if (!data.setupComplete || showSplash) return;
+    if (!data.setupComplete || splashActive) return;
     const today = format(new Date(), "yyyy-MM-dd");
     const isPayday =
       projection.daysUntilPayday === 0 || isSameDay(parseISO(data.nextPayday), new Date());
     if (isPayday && data.lastPaydayCelebrated !== today) {
       setShowPayday(true);
     }
-  }, [data.setupComplete, data.nextPayday, data.lastPaydayCelebrated, projection.daysUntilPayday, showSplash]);
+  }, [data.setupComplete, data.nextPayday, data.lastPaydayCelebrated, projection.daysUntilPayday, splashActive]);
 
   // On-open local notification: fire at most once per day when there's a
   // notify-worthy heads-up (a projected dip, or payday) and permission is on.
   useEffect(() => {
-    if (!hydrated || !data.setupComplete || showSplash) return;
+    if (!hydrated || !data.setupComplete || splashActive) return;
     if (notifPerm !== "granted" || !headsUp?.notify) return;
     const today = format(new Date(), "yyyy-MM-dd");
     if (data.lastNotified === today) return;
     sendHeadsUp(headsUp.message, headsUp.tag);
     updateData({ lastNotified: today });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hydrated, data.setupComplete, showSplash, notifPerm, headsUp]);
+  }, [hydrated, data.setupComplete, splashActive, notifPerm, headsUp]);
 
   const updateData = useCallback((patch: Partial<AppData>) => {
     setData((prev) => {
@@ -175,9 +180,18 @@ export default function App() {
       setData({ ...defaultData });
       setTab("today");
       setOverlay(null);
-      setShowSplash(true);
-      setTimeout(() => setShowSplash(false), 2600);
+      setIntroDone(false); // replay the intro on the way back to setup
     });
+  };
+
+  const handleIntroDone = () => {
+    try {
+      localStorage.setItem("hr-intro-played", "1");
+    } catch {
+      /* ignore */
+    }
+    introMode.current = "short";
+    setIntroDone(true);
   };
 
   const handleLoadDemo = (scenario: "healthy" | "tight" | "danger") => {
@@ -237,8 +251,7 @@ export default function App() {
     updateData({ permissionsSeen: true });
   };
 
-  if (showSplash || !hydrated) return <SplashScreen />;
-
+  const renderRoutes = () => {
   if (!data.onboardingComplete) {
     return (
       <PageTransition id="onboarding">
@@ -363,6 +376,18 @@ export default function App() {
           <Suspense fallback={null}>
             <PaydayScreen safeToSpend={projection.safeToSpend} onDismiss={dismissPayday} />
           </Suspense>
+        )}
+      </AnimatePresence>
+    </>
+  );
+  };
+
+  return (
+    <>
+      {!splashActive && renderRoutes()}
+      <AnimatePresence>
+        {splashActive && (
+          <SplashIntro mode={introMode.current} onDone={handleIntroDone} />
         )}
       </AnimatePresence>
     </>
