@@ -12,7 +12,7 @@ import {
   ShieldCheck,
 } from "../lib/icons";
 import { staggerContainer, staggerItem } from "../lib/motion";
-import type { NotifyState } from "../lib/notify";
+import { type NotifyState, needsInstallForNotify } from "../lib/notify";
 import { CURRENCIES } from "../lib/finance";
 import type { CurrencyCode, WeekStart } from "../types";
 
@@ -58,6 +58,7 @@ export default function MenuScreen({
   const [showDev, setShowDev] = useState(false);
   const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const fileInput = useRef<HTMLInputElement | null>(null);
+  const needsInstall = needsInstallForNotify();
   const startPress = () => {
     pressTimer.current = setTimeout(() => setShowDev((v) => !v), 600);
   };
@@ -120,8 +121,29 @@ export default function MenuScreen({
           </div>
         </motion.section>
 
+        {/* Notifications — iPhone (Safari, not installed): guide to install first */}
+        {needsInstall && (
+          <motion.section variants={staggerItem} style={{ padding: "20px 24px 0" }}>
+            <p className="section-header">Notifications</p>
+            <div className="card" style={{ padding: 0 }}>
+              <div className="row">
+                <span className="chip-ico">
+                  <Bell size={20} weight="duotone" />
+                </span>
+                <div className="main">
+                  <p>Heads-up alerts</p>
+                  <p className="sub">
+                    On iPhone, add Headroom to your Home Screen first (Share → Add to Home
+                    Screen), then open it from there to turn alerts on.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </motion.section>
+        )}
+
         {/* Notifications */}
-        {notifPerm !== "unsupported" && (
+        {!needsInstall && notifPerm !== "unsupported" && (
           <motion.section variants={staggerItem} style={{ padding: "20px 24px 0" }}>
             <p className="section-header">Notifications</p>
             <div className="card" style={{ padding: 0 }}>

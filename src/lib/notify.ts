@@ -13,6 +13,33 @@
 
 export type NotifyState = "granted" | "default" | "denied" | "unsupported";
 
+export function isIOS(): boolean {
+  if (typeof navigator === "undefined") return false;
+  const ua = navigator.userAgent;
+  return (
+    /iphone|ipad|ipod/i.test(ua) ||
+    // iPadOS 13+ identifies as Mac but is touch-capable
+    (/Macintosh/.test(ua) && typeof document !== "undefined" && "ontouchend" in document)
+  );
+}
+
+export function isStandalone(): boolean {
+  if (typeof window === "undefined") return false;
+  return (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    (window.navigator as unknown as { standalone?: boolean }).standalone === true
+  );
+}
+
+/**
+ * iOS only exposes the Notification/Push APIs inside an installed (home-screen)
+ * PWA — never in a Safari tab. When true, the user must Add to Home Screen
+ * before alerts can be turned on.
+ */
+export function needsInstallForNotify(): boolean {
+  return isIOS() && !isStandalone() && !("Notification" in window);
+}
+
 export function notifySupported(): boolean {
   return typeof window !== "undefined" && "Notification" in window;
 }
